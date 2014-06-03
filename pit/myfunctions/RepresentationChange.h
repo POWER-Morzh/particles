@@ -16,10 +16,7 @@
 #include "particles/pit/records/Particle.h"
 #include "particles/pit/records/ParticleCompressed.h"
 
-
-#define MUL_FACTOR 10
 #define N_INTERVALS_HISTOGRAM 21
-
 
 namespace particles {
   namespace pit {

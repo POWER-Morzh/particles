@@ -373,12 +373,11 @@ double particles::pit::myfunctions::RepresentationChange::computeMaxError( const
   const ParticleHeap::HeapEntries& currentParticles = ParticleHeap::getInstance().getData(cellIndex);
   const ParticleCompressedHeap::HeapEntries& compressedParticles = ParticleCompressedHeap::getInstance().getData(cellIndex);
 
-  double real_error;
-
   double maxErrorOffset = 0;
   tarch::la::Vector<DIMENSIONS, double> meanVelocity = fineGridCell.getMeanVelocity();
 
   if ( NumberOfParticles > 0 ) {
+    double real_error=0;
 
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
@@ -409,15 +408,17 @@ void particles::pit::myfunctions::RepresentationChange::writeInCompressedHeap(
 
   // absVlosity is used to store asolute values of currentParicle velocity
   tarch::la::Vector<DIMENSIONS, double> absOffset(0);
+  tarch::la::Vector<DIMENSIONS, double> coordinateOffset(0);
 
   for (int i = 0; i< NumberOfParticles; i++) {
     particles::pit::records::ParticleCompressedPacked newParticleCompressed;
-    newParticleCompressed.setX(  currentParticles[i]._persistentRecords._x - meanCoordinate );
 
     for(int d = 0; d<DIMENSIONS; d++) {
       absOffset[d] = MUL_FACTOR * (std::abs( currentParticles[i]._persistentRecords._v[d] ) - meanVelocity[d]);
+      coordinateOffset[d] = MUL_FACTOR * (currentParticles[i]._persistentRecords._x[d] - meanCoordinate[d]);
     }
     newParticleCompressed.setV( absOffset );
+    newParticleCompressed.setX( coordinateOffset );
     ParticleCompressedHeap::getInstance().getData(cellIndex).push_back(newParticleCompressed);
   }
 
@@ -500,13 +501,13 @@ void particles::pit::myfunctions::RepresentationChange::writeAllInFile() {
   //writeHistogramData( "histogram", writeFirstTime);
 
   // Write globalL2ErrorNorm
-  writeGlobalNorm( "globalL2ErrorNorm.dat", _globalL2ErrorNorm, writeFirstTime );
+  writeGlobalNorm( "globalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
 
   // Write _globalL2OffsetNorm
   //writeGlobalNorm( "globalL2OffsetNorm.dat", _globalL2OffsetNorm, writeFirstTime );
 
   // Write _globalMaxL2ErrorNorm
-  writeGlobalNorm( "globalMaxL2ErrorNorm.dat", _globalMaxL2ErrorNorm, writeFirstTime );
+  writeGlobalNorm( "globalMaxL2ErrorNorm", _globalMaxL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxRelativeError
   //writeGlobalNorm( "globalMaxRelativeError.dat", _globalMaxRelativeError, writeFirstTime );
@@ -515,19 +516,21 @@ void particles::pit::myfunctions::RepresentationChange::writeAllInFile() {
   //writeGlobalNorm( "globalMaxOffset.dat", _globalMaxOffset, writeFirstTime );
 
   // Write global max error
-  writeGlobalNorm( "global_max_error.dat", _global_max_error, writeFirstTime );
+  writeGlobalNorm( "global_max_error", _global_max_error, writeFirstTime );
 
   writeFirstTime = 0;
 }
 
 
 void particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( const std::string& filename, const tarch::la::Vector<DIMENSIONS,double>& Norm, const bool& writeFirstTime ) {
+  std::ostringstream full_file_name;
+  full_file_name << filename << "-F" << MUL_FACTOR << "-M" << MANTISSA << ".dat";
   std::ofstream out;
   if( writeFirstTime ) {
     out.open( filename.c_str() );
   } else {
     out.close();
-    out.open( filename.c_str(), std::ofstream::app );
+    out.open( full_file_name.str().c_str(), std::ofstream::app );
   }
   if ( (!out.fail()) && out.is_open() && !writeFirstTime ) {
     for(int d = 0; d<DIMENSIONS; d++) {
@@ -610,7 +613,7 @@ void particles::pit::myfunctions::RepresentationChange::ascend(
 
 
       // Output for checking
-      printParticlesInfo( fineGridCell, "l2ErrorNorm", l2ErrorNorm );
+      //printParticlesInfo( fineGridCell, "l2ErrorNorm", l2ErrorNorm );
 
       _maxRelativeErrorOut << maxRelativeError << " ";
       _maxErrorOut << maxError << " ";

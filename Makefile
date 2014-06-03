@@ -5,6 +5,7 @@
 -include files.mk
 
 MANTISSA ?= 8
+MUL_FACTOR ?= 1
 
 
 
@@ -32,7 +33,7 @@ DIM=-DDim2
 #----------------
 PROJECT_CFLAGS = #-DDebug -DAsserts 
 PROJECT_LFLAGS = 
-EXECUTABLE=peano-Particles
+EXECUTABLE=bin/peano-Particles-F$(MUL_FACTOR)-M$(MANTISSA)
 #EXECUTABLE=peano-PoissonWithJacobi-debug
 
 
@@ -64,7 +65,7 @@ SYSTEM_LFLAGS = $(LINK_TBB)    $(LINK_MPI)
 # Settings for the GNU Compiler (Debug Mode)
 # ------------------------------------------
 CC=g++
-COMPILER_CFLAGS=-O0  -Wstrict-aliasing -fstrict-aliasing -ggdb -std=c++0x -DMANTISSA=$(MANTISSA)
+COMPILER_CFLAGS=-O0  -Wstrict-aliasing -fstrict-aliasing -ggdb -std=c++0x -DMANTISSA=$(MANTISSA) -DMUL_FACTOR=$(MUL_FACTOR)
 #-pedantic -pedantic-errors -Wall -Werror
 
 # Settings for the GNU Compiler (Release Mode)

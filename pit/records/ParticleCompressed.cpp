@@ -1,7 +1,5 @@
 #include "particles/pit/records/ParticleCompressed.h"
 
-#define MANTISA 8
-
 #if defined MANTISSA
 #warning "MANTISSA DEFINED as " MANTISSA
 #endif
@@ -603,14 +601,14 @@ particles::pit::records::ParticleCompressedPacked::~ParticleCompressedPacked() {
    assertion(elementIndex<DIMENSIONS);
 
    if( _x[elementIndex] == 0 ) {
-      return 0;
+        return 0;
    }
    int tmp = 0;
    tmp |= ((_x[elementIndex] & 0x8000) << 16);
-   int exponent = ((_x[elementIndex] & 0x7f00) >> 8);
-   exponent = exponent - 63 + 1023;
+   int exponent = ((_x[elementIndex] & (0x000fff >> (MANTISSA-3)) << MANTISSA) >> MANTISSA);
+   exponent = exponent - (0xfff >> (MANTISSA - 2)) + 1023;
    tmp |= (exponent << 20);
-   tmp |= ((_x[elementIndex] & 0x00ff) << 12);
+   tmp |= ((_x[elementIndex] & (0xffff >> (16 -MANTISSA))) << (20 - MANTISSA));
    double result = 0;
    char* double_ptr = reinterpret_cast<char*> (&result) + 4;
    char* int_ptr = reinterpret_cast<char*> (&tmp);
@@ -636,16 +634,16 @@ particles::pit::records::ParticleCompressedPacked::~ParticleCompressedPacked() {
    *(int_ptr + 1) = *(double_ptr + 1);
    *(int_ptr + 2) = *(double_ptr + 2);
    *(int_ptr + 3) = *(double_ptr + 3);
-   if(tmp == 0) {
+   if( tmp == 0 ) {
       _x[elementIndex] = 0;
    } else {
-      tmp = tmp >> 12;
+      short int exponent = (tmp & 0x7ff00000) >> 20;
+      tmp = tmp >> (20 - MANTISSA);
    
-      _x[elementIndex] = tmp & 0xff;
-      short int exponent = (tmp & 0x0007ff00) >> 8;
-      exponent = exponent - 1023 + 63;
-      _x[elementIndex] |= (exponent << 8);
-      _x[elementIndex] |= (tmp >> 4) & 0x8000;
+      _x[elementIndex] = tmp & (0xffff >> (8+8-MANTISSA));
+      exponent = exponent - 1023 + (0xfff >> (MANTISSA - 2));
+      _x[elementIndex] |= (exponent << MANTISSA);
+      _x[elementIndex] |= (tmp >> (MANTISSA - 4)) & 0x8000;
    }
    
 }
@@ -718,10 +716,10 @@ particles::pit::records::ParticleCompressedPacked::~ParticleCompressedPacked() {
    }
    int tmp = 0;
    tmp |= ((_v[elementIndex] & 0x8000) << 16);
-   int exponent = ((_v[elementIndex] & (0x000fff >> (MANTISA-3)) << MANTISA) >> MANTISA);
-   exponent = exponent - (0xfff >> (MANTISA - 2)) + 1023;
+   int exponent = ((_v[elementIndex] & (0x000fff >> (MANTISSA-3)) << MANTISSA) >> MANTISSA);
+   exponent = exponent - (0xfff >> (MANTISSA - 2)) + 1023;
    tmp |= (exponent << 20);
-   tmp |= ((_v[elementIndex] & (0xffff >> (16 -MANTISA))) << (20 - MANTISA));
+   tmp |= ((_v[elementIndex] & (0xffff >> (16 -MANTISSA))) << (20 - MANTISSA));
    double result = 0;
    char* double_ptr = reinterpret_cast<char*> (&result) + 4;
    char* int_ptr = reinterpret_cast<char*> (&tmp);
@@ -751,12 +749,12 @@ particles::pit::records::ParticleCompressedPacked::~ParticleCompressedPacked() {
       _v[elementIndex] = 0;
    } else {
       short int exponent = (tmp & 0x7ff00000) >> 20;
-      tmp = tmp >> (20 - MANTISA);
+      tmp = tmp >> (20 - MANTISSA);
    
-      _v[elementIndex] = tmp & (0xffff >> (8+8-MANTISA));
-      exponent = exponent - 1023 + (0xfff >> (MANTISA - 2));
-      _v[elementIndex] |= (exponent << MANTISA);
-      _v[elementIndex] |= (tmp >> (MANTISA - 4)) & 0x8000;
+      _v[elementIndex] = tmp & (0xffff >> (8+8-MANTISSA));
+      exponent = exponent - 1023 + (0xfff >> (MANTISSA - 2));
+      _v[elementIndex] |= (exponent << MANTISSA);
+      _v[elementIndex] |= (tmp >> (MANTISSA - 4)) & 0x8000;
    }
    
 }

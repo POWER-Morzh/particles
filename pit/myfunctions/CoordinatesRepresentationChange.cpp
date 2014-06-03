@@ -1,3 +1,4 @@
+#include "particles/pit/myfunctions/RepresentationChange.h"
 #include "particles/pit/myfunctions/CoordinatesRepresentationChange.h"
 #include <iostream>
 #include <cmath>
@@ -6,6 +7,7 @@
 #include <string>
 #include "peano/utils/Loop.h"
 
+double particles::pit::myfunctions::CoordinatesRepresentationChange::_global_max_error = 0;
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_globalMaxRelativeError = 0;
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_globalMaxL2ErrorNorm = 0;
 int particles::pit::myfunctions::CoordinatesRepresentationChange::_globalNormAdditions = 0;
@@ -153,21 +155,21 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxR
   const ParticleHeap::HeapEntries& currentParticles = ParticleHeap::getInstance().getData(cellIndex);
   const ParticleCompressedHeap::HeapEntries& compressedParticles = ParticleCompressedHeap::getInstance().getData(cellIndex);
 
-  tarch::la::Vector<DIMENSIONS, double> MeanCoordinate(0);
+  tarch::la::Vector<DIMENSIONS, double> meanCoordinate(0);
 
   // Here we check if there more than one particle to prevent division by zero
   if ( NumberOfParticles > 1 ) {
     // Compute the mean value of the coordinate for each axes
-    MeanCoordinate = computeMeanCoordinate(currentParticles, NumberOfParticles);
+    meanCoordinate = computeMeanCoordinate(currentParticles, NumberOfParticles);
 
-    double preciseOffset = 0;
+    double precise_offset = 0;
 
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
-		  preciseOffset = currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d];
+	      precise_offset = currentParticles.at(i)._persistentRecords._x[d] - meanCoordinate[d];
 
-	    if( maxRelativeError <  std::abs( (preciseOffset - compressedParticles.at(i).getX()[d]) / preciseOffset ) ) {
-	      maxRelativeError = std::abs( (preciseOffset - compressedParticles.at(i).getX()[d]) / preciseOffset);
+	    if( maxRelativeError <  std::abs( (precise_offset - compressedParticles.at(i).getX()[d]) / precise_offset ) ) {
+	      maxRelativeError = std::abs( (precise_offset - compressedParticles.at(i).getX()[d]) / precise_offset);
 	    }
 	  }
     }
@@ -191,9 +193,11 @@ tarch::la::Vector<DIMENSIONS, double> particles::pit::myfunctions::CoordinatesRe
     // Compute the mean value of the coordinate for each axes
     MeanCoordinate = computeMeanCoordinate(currentParticles, NumberOfParticles);
 
+    double precise_offset = 0;
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
-	    l2ErrorNorm[d] += std::abs(currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d] - compressedParticles.at(i).getX()[d]);
+	    precise_offset = currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d];
+	    l2ErrorNorm[d] += std::abs(MUL_FACTOR*precise_offset - compressedParticles.at(i).getX()[d]) / MUL_FACTOR;
 	  }
     }
     for (int d =0; d<DIMENSIONS; d++) {
@@ -272,11 +276,15 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxE
   tarch::la::Vector<DIMENSIONS, double> MeanCoordinate = fineGridCell.getMeanCoordinate();
 
   if ( NumberOfParticles > 0 ) {
+    double real_error = 0;
 
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
-	    if( maxOffset < std::abs(currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d] - compressedParticles.at(i).getX()[d]) )
-	      maxOffset = std::abs(currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d] - compressedParticles.at(i).getX()[d]);
+	    real_error = MUL_FACTOR*(std::abs(currentParticles.at(i)._persistentRecords._x[d])
+	                 - MeanCoordinate[d])
+	                 - compressedParticles.at(i).getX()[d];
+	    if( maxOffset < std::abs(real_error) / MUL_FACTOR )
+	      maxOffset = std::abs(real_error) / MUL_FACTOR;
 	  }
     }
 
@@ -288,6 +296,7 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxE
 
 
 void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteration() {
+  _global_max_error = 0;
   _globalMaxRelativeError = 0;
   _globalMaxL2ErrorNorm = 0;
   tarch::la::Vector<DIMENSIONS, double> zeroVector(0);
@@ -313,9 +322,11 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteratio
 
 void particles::pit::myfunctions::CoordinatesRepresentationChange::endIteration() {
 
-  for(int d = 0; d<DIMENSIONS; d++) {
-    _globalL2ErrorNorm[d] /= _globalNormAdditions;
-  }
+    if ( _globalNormAdditions > 0 ) {
+        for(int d = 0; d<DIMENSIONS; d++) {
+            _globalL2ErrorNorm[d] /= _globalNormAdditions;
+        }
+    }
 
   writeAllInFile();
 
@@ -348,13 +359,16 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
 
   static bool writeFirstTime = 1;
   // Write globalL2Norm
-  writeGlobalNorm( "coordinateGlobalL2ErrorNorm.dat", _globalL2ErrorNorm, writeFirstTime );
+  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxL2ErrorNorm
-  writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm.dat", _globalMaxL2ErrorNorm, writeFirstTime );
+  //writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm.dat", _globalMaxL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxRelativeError
-  writeGlobalNorm( "coordinateGlobalMaxRelativeError.dat", _globalMaxRelativeError, writeFirstTime );
+  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxRelativeError", _globalMaxRelativeError, writeFirstTime );
+
+  // Write _globalMaxRelativeError
+  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinate_global_max_error", _global_max_error, writeFirstTime );
   writeFirstTime = 0;
 }
 
@@ -414,6 +428,9 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::ascend(
         _globalMaxRelativeError = maxRelativeError;
       }
       double maxError = computeMaxError( fineGridCell );
+      if(_global_max_error < maxError) {
+          _global_max_error = maxError;
+      }
       double maxOffset = computeMaxOffset( fineGridCell );
       // Compute RMSD
       tarch::la::Vector<DIMENSIONS,double> rmsd = computeRMSD( fineGridCell );
