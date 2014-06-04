@@ -362,10 +362,10 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
   particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxL2ErrorNorm
-  //writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm.dat", _globalMaxL2ErrorNorm, writeFirstTime );
+  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm.dat", _globalMaxL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxRelativeError
-  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxRelativeError", _globalMaxRelativeError, writeFirstTime );
+  //particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxRelativeError", _globalMaxRelativeError, writeFirstTime );
 
   // Write _globalMaxRelativeError
   particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinate_global_max_error", _global_max_error, writeFirstTime );

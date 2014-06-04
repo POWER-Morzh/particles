@@ -140,7 +140,7 @@ build: files.mk $(OBJECTS)
 
 
 clean:
-	rm -f $(EXECUTABLE)
+	#rm -f $(EXECUTABLE)
 	rm -f $(OBJECTS)
 	rm -f files.mk
 	rm -f compiler-minutes.txt
