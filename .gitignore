@@ -39,3 +39,4 @@ compiler-minutes.txt
 *.vtk
 *.dat
 *.png
+peano-Particles*

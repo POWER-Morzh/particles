@@ -8,7 +8,7 @@ do
 	do
 		(cd ..; make clean;)
 		(cd ..; make MANTISSA=$m MUL_FACTOR=$f)
-		(cd ../output; ../bin/peano-Particles-F$f-M$m pit video 250000 1000000 0.05 0.1)
+		(cd ../output; ../bin/peano-Particles-F$f-M$m pit video 250000 100 0.05 0.1)
 	done
 done
 

@@ -7,6 +7,8 @@
 #include <string>
 #include "peano/utils/Loop.h"
 
+//#define MUL_FACTOR 4
+
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_global_max_error = 0;
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_globalMaxRelativeError = 0;
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_globalMaxL2ErrorNorm = 0;
@@ -77,16 +79,18 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::printParticle
     std::cout << "---Offsets of coordinates compressed---------------------------:" << std::endl;
     for(int d=0; d<DIMENSIONS; d++) {
       for (int i=0; i<NumberOfParticles; i++) {
-    	std::cout << std::abs( compressedParticles.at(i).getX()[d] ) << " + ";
+    	std::cout << compressedParticles.at(i).getX()[d] << " + ";
       }
       std::cout << std::endl;
     }
 
+    double offset;
     // Error
-    std::cout << "---Errors for coordinates---------------------------:" << std::endl;
+    std::cout << "---Absolute errors for coordinates---------------------------:" << std::endl;
     for(int d=0; d<DIMENSIONS; d++) {
       for (int i=0; i<NumberOfParticles; i++) {
-    	std::cout << std::abs( (currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d] - compressedParticles.at(i).getX()[d]) ) << " + ";
+        offset = currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d];
+    	std::cout << std::abs( ((MUL_FACTOR/2.0)*offset - compressedParticles.at(i).getX()[d]) ) / (MUL_FACTOR/2.0) << " + ";
       }
       std::cout << std::endl;
     }
@@ -197,7 +201,7 @@ tarch::la::Vector<DIMENSIONS, double> particles::pit::myfunctions::CoordinatesRe
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
 	    precise_offset = currentParticles.at(i)._persistentRecords._x[d] - MeanCoordinate[d];
-	    l2ErrorNorm[d] += std::abs(MUL_FACTOR*precise_offset - compressedParticles.at(i).getX()[d]) / MUL_FACTOR;
+	    l2ErrorNorm[d] += std::abs((MUL_FACTOR/2.0)*precise_offset - compressedParticles.at(i).getX()[d]) / (MUL_FACTOR/2.0);
 	  }
     }
     for (int d =0; d<DIMENSIONS; d++) {
@@ -280,11 +284,11 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxE
 
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
-	    real_error = MUL_FACTOR*(std::abs(currentParticles.at(i)._persistentRecords._x[d])
+	    real_error = (MUL_FACTOR/2.0)*(std::abs(currentParticles.at(i)._persistentRecords._x[d])
 	                 - MeanCoordinate[d])
 	                 - compressedParticles.at(i).getX()[d];
-	    if( maxOffset < std::abs(real_error) / MUL_FACTOR )
-	      maxOffset = std::abs(real_error) / MUL_FACTOR;
+	    if( maxOffset < std::abs(real_error) / (MUL_FACTOR/2.0) )
+	      maxOffset = std::abs(real_error) / (MUL_FACTOR/2.0);
 	  }
     }
 
@@ -362,7 +366,7 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
   particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxL2ErrorNorm
-  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm.dat", _globalMaxL2ErrorNorm, writeFirstTime );
+  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm", _globalMaxL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxRelativeError
   //particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxRelativeError", _globalMaxRelativeError, writeFirstTime );
@@ -449,10 +453,10 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::ascend(
       // Don't forget to increment _globalNormAdditions to divide _globalL2Norm by it
       // at the end of iteration before writing it in the file!
       ++_globalNormAdditions;
-      std::cout << "_globalNormAdditions: " << _globalNormAdditions << std::endl;
+      //std::cout << "_globalNormAdditions: " << _globalNormAdditions << std::endl;
 
       // Output for checking
-      //printParticlesInfo( fineGridCell, "l2ErrorNorm", l2ErrorNorm );
+      //printParticlesInfo( fineGridCell, "maxError", maxError );
 
       _maxRelativeErrorOut << maxRelativeError << " ";
       _maxErrorOut << maxError << " ";

@@ -18,6 +18,8 @@
 
 #define N_INTERVALS_HISTOGRAM 21
 
+
+
 namespace particles {
   namespace pit {
     namespace myfunctions {

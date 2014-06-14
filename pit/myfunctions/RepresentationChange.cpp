@@ -6,8 +6,9 @@
 #include <fstream>
 #include <string>
 #include "peano/utils/Loop.h"
+#include "particles/pit/myfunctions/BinaryPattern.h"
 
-
+//#define MUL_FACTOR 4
 
 tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> particles::pit::myfunctions::RepresentationChange::_histogramData(0);
 
@@ -130,18 +131,22 @@ void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(const
 
     // Offsets of velocities
     std::cout << "---Offsets of velocities---------------------------:" << std::endl;
-    for (int i=0; i<NumberOfParticles; i++) {
-      for(int d=0; d<DIMENSIONS; d++) {
-    	std::cout << std::abs( currentParticles.at(i)._persistentRecords._v(d)) - meanVelocity[d] << " ";
+    for(int d=0; d<DIMENSIONS; d++) {
+      for (int i=0; i<NumberOfParticles; i++) {
+    	std::cout << std::abs( currentParticles.at(i)._persistentRecords._v(d)) - meanVelocity[d] << std::endl;
+    	particles::pit::myfunctions::BinaryPattern::PrintBinaryDouble(std::abs( currentParticles.at(i)._persistentRecords._v(d)) - meanVelocity[d]);
+    	std::cout << std::endl;
       }
       std::cout << std::endl;
     }
 
     // Compressed offsets of velocities
     std::cout << "---Offsets of velocities compressed---------------------------:" << std::endl;
-    for (int i=0; i<NumberOfParticles; i++) {
-      for(int d=0; d<DIMENSIONS; d++) {
-    	std::cout << compressedParticles.at(i).getV()[d] << " ";
+    for(int d=0; d<DIMENSIONS; d++) {
+      for (int i=0; i<NumberOfParticles; i++) {
+    	std::cout << compressedParticles.at(i).getV()[d] << std::endl;
+    	particles::pit::myfunctions::BinaryPattern::PrintBinaryDoubleCompressed(compressedParticles.at(i).getV()[d], 8);
+    	std::cout << std::endl;
       }
       std::cout << std::endl;
     }
@@ -152,7 +157,7 @@ void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(const
 //    for (int i=0; i<NumberOfParticles; i++) {
 //      for(int d=0; d<DIMENSIONS; d++) {
 //        offset = std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d];
-//    	std::cout << std::abs( (MUL_FACTOR*offset- compressedParticles.at(i).getV()[d]) / (MUL_FACTOR*offset) ) << " ";
+//    	std::cout << std::abs( ((MUL_FACTOR/2.0)*offset- compressedParticles.at(i).getV()[d]) / ((MUL_FACTOR/2.0)*offset) ) << " ";
 //      }
 //      std::cout << std::endl;
 //    }
@@ -160,7 +165,7 @@ void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(const
     for (int i=0; i<NumberOfParticles; i++) {
       for(int d=0; d<DIMENSIONS; d++) {
           offset = std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d];
-          std::cout << std::abs( (MUL_FACTOR*offset - compressedParticles.at(i).getV()[d]) / MUL_FACTOR ) << " ";
+          std::cout << std::abs( ((MUL_FACTOR/2.0)*offset - compressedParticles.at(i).getV()[d]) / (MUL_FACTOR/2.0) ) << " ";
       }
       std::cout << std::endl;
     }
@@ -171,7 +176,7 @@ void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(const
 
 void particles::pit::myfunctions::RepresentationChange::leaveCell(particles::pit::Cell& fineGridCell) {
 
-  std::cout <<"leaveCell()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << MANTISSA << std::endl;
+  //std::cout <<"leaveCell()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << MANTISSA << std::endl;
 
   const int cellIndex = fineGridCell.getCellIndex();
   const int NumberOfParticles = ParticleHeap::getInstance().getData(cellIndex).size();
@@ -236,7 +241,7 @@ tarch::la::Vector<DIMENSIONS, double> particles::pit::myfunctions::Representatio
 	  for(int d=0; d < DIMENSIONS; d++) {
 	      precise_offset = std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d];
 
-	    rmsd[d] += std::pow ( ( (MUL_FACTOR*precise_offset - compressedParticles.at(i).getV()[d])/ (MUL_FACTOR*precise_offset) ), 2);
+	    rmsd[d] += std::pow ( ( ((MUL_FACTOR/2.0)*precise_offset - compressedParticles.at(i).getV()[d])/ ((MUL_FACTOR/2.0)*precise_offset) ), 2);
 	  }
     }
     for(int d=0; d < DIMENSIONS; d++) {
@@ -270,8 +275,8 @@ double particles::pit::myfunctions::RepresentationChange::computeMaxRelativeErro
 	  for(int d=0; d < DIMENSIONS; d++) {
 	      precise_offset = std::abs(std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d]);
 
-	    if( maxRelativeError <  std::abs( (MUL_FACTOR*precise_offset - std::abs(compressedParticles.at(i).getV()[d])) / (MUL_FACTOR*precise_offset) ) ) {
-	      maxRelativeError = std::abs( (MUL_FACTOR*precise_offset - std::abs(compressedParticles.at(i).getV()[d])) / (MUL_FACTOR*precise_offset));
+	    if( maxRelativeError <  std::abs( ((MUL_FACTOR/2.0)*precise_offset - std::abs(compressedParticles.at(i).getV()[d])) / ((MUL_FACTOR/2.0)*precise_offset) ) ) {
+	      maxRelativeError = std::abs( ((MUL_FACTOR/2.0)*precise_offset - std::abs(compressedParticles.at(i).getV()[d])) / ((MUL_FACTOR/2.0)*precise_offset));
 	    }
 	  }
     }
@@ -299,7 +304,7 @@ tarch::la::Vector<DIMENSIONS, double> particles::pit::myfunctions::Representatio
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
 	    precise_offset = std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d];
-	    l2ErrorNorm[d] += std::abs(MUL_FACTOR*precise_offset - compressedParticles.at(i).getV()[d]) / MUL_FACTOR;
+	    l2ErrorNorm[d] += std::abs((MUL_FACTOR/2.0)*precise_offset - compressedParticles.at(i).getV()[d]) / (MUL_FACTOR/2.0);
 	  }
     }
     for (int d =0; d<DIMENSIONS; d++) {
@@ -381,10 +386,10 @@ double particles::pit::myfunctions::RepresentationChange::computeMaxError( const
 
     for (int i=0; i<NumberOfParticles; i++) {
 	  for(int d=0; d < DIMENSIONS; d++) {
-	    real_error = MUL_FACTOR*(std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d])
+	    real_error = (MUL_FACTOR/2.0)*(std::abs(currentParticles.at(i)._persistentRecords._v[d]) - meanVelocity[d])
                        - compressedParticles.at(i).getV()[d];
-	    if( maxErrorOffset < std::abs(real_error) / MUL_FACTOR)
-	      maxErrorOffset = std::abs(real_error) / MUL_FACTOR;
+	    if( maxErrorOffset < std::abs(real_error) / (MUL_FACTOR/2.0))
+	      maxErrorOffset = std::abs(real_error) / (MUL_FACTOR/2.0);
 	  }
     }
 
@@ -414,8 +419,8 @@ void particles::pit::myfunctions::RepresentationChange::writeInCompressedHeap(
     particles::pit::records::ParticleCompressedPacked newParticleCompressed;
 
     for(int d = 0; d<DIMENSIONS; d++) {
-      absOffset[d] = MUL_FACTOR * (std::abs( currentParticles[i]._persistentRecords._v[d] ) - meanVelocity[d]);
-      coordinateOffset[d] = MUL_FACTOR * (currentParticles[i]._persistentRecords._x[d] - meanCoordinate[d]);
+      absOffset[d] = (MUL_FACTOR/2.0) * (std::abs( currentParticles[i]._persistentRecords._v[d] ) - meanVelocity[d]);
+      coordinateOffset[d] = (MUL_FACTOR/2.0) * (currentParticles[i]._persistentRecords._x[d] - meanCoordinate[d]);
     }
     newParticleCompressed.setV( absOffset );
     newParticleCompressed.setX( coordinateOffset );
@@ -524,10 +529,10 @@ void particles::pit::myfunctions::RepresentationChange::writeAllInFile() {
 
 void particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( const std::string& filename, const tarch::la::Vector<DIMENSIONS,double>& Norm, const bool& writeFirstTime ) {
   std::ostringstream full_file_name;
-  full_file_name << filename << "-F" << MUL_FACTOR << "-M" << MANTISSA << ".dat";
+  full_file_name << filename << "-F" << (MUL_FACTOR/2.0) << "-M" << MANTISSA << ".dat";
   std::ofstream out;
   if( writeFirstTime ) {
-    out.open( filename.c_str() );
+    out.open( full_file_name.str().c_str() );
   } else {
     out.close();
     out.open( full_file_name.str().c_str(), std::ofstream::app );
@@ -592,7 +597,7 @@ void particles::pit::myfunctions::RepresentationChange::ascend(
       // Computer L2-Norm
       tarch::la::Vector<DIMENSIONS,double> l2ErrorNorm = computeL2ErrorNorm( fineGridCell );
       tarch::la::Vector<DIMENSIONS,double> l2Norm = computeL2Norm( fineGridCell );
-      std::cout << "ascend() l2ErrorNorm: " << l2ErrorNorm << std::endl;
+      //std::cout << "ascend() l2ErrorNorm: " << l2ErrorNorm << std::endl;
 
       // Histogram process
       processHistogram( l2ErrorNorm );

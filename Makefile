@@ -5,7 +5,7 @@
 -include files.mk
 
 MANTISSA ?= 8
-MUL_FACTOR ?= 1
+MUL_FACTOR ?= 10
 
 
 
