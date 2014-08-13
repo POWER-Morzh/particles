@@ -7,7 +7,13 @@
 #include <string>
 #include "peano/utils/Loop.h"
 
-//#define MUL_FACTOR 4
+// I put it here because it is the easiest way to give it to processHistogram
+// and writeHistogram
+#define HISTOGRAM_SMALL_BOUNDARY 1e-7
+#define HISTOGRAM_BIG_BOUNDARY 1e-4
+
+
+tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> particles::pit::myfunctions::CoordinatesRepresentationChange::_histogramData(0);
 
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_global_max_error = 0;
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_globalMaxRelativeError = 0;
@@ -300,6 +306,10 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxE
 
 
 void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteration() {
+
+  tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> zeroVector_N_INTERVALS_HISTOGRAM(0);
+  _histogramData = zeroVector_N_INTERVALS_HISTOGRAM;
+
   _global_max_error = 0;
   _globalMaxRelativeError = 0;
   _globalMaxL2ErrorNorm = 0;
@@ -353,7 +363,7 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
   //writeNorm( "coordinateRMSDOut", _RMSDOut );
 
   // Write l2ErrorNorm
-  //writeNorm( "coordinateL2ErrorNorm", _L2ErrorNormOut );
+  writeNorm( "coordinateL2ErrorNorm", _L2ErrorNormOut );
 
   // Write l2Norm
   //writeNorm( "coordinateL2Norm", _L2NormOut );
@@ -362,6 +372,11 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
   //writeNorm( "coordinateMeanCoordinate", _MeanCoordinateOut );
 
   static bool writeFirstTime = 1;
+  // Write Histogram data
+  particles::pit::myfunctions::RepresentationChange::writeHistogramData(
+    "histogramL2ErrorOffsetCoordinate", writeFirstTime, _histogramData,
+    HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY);
+
   // Write globalL2Norm
   particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
 
@@ -461,6 +476,12 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::ascend(
       _maxRelativeErrorOut << maxRelativeError << " ";
       _maxErrorOut << maxError << " ";
       _maxOffsetOut << maxOffset << " ";
+
+      // Histogram process
+      particles::pit::myfunctions::RepresentationChange::processHistogram(
+          _histogramData, l2ErrorNorm,
+          HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY );
+
       for(int d=0; d<DIMENSIONS; d++) {
         _RMSDOut << rmsd[d] << " ";
         _L2ErrorNormOut << l2ErrorNorm[d] << " ";

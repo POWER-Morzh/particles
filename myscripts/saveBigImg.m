@@ -7,7 +7,7 @@ filePath = '../output/'; % folder with dat files
 
 FACTOR = 2.^[0:0];
 MANTISSA = 7:8;
-%FACTOR = [0.5 FACTOR];
+FACTOR = [0.5 FACTOR];
 
 filenamelist = char('coordinateGlobalL2ErrorNorm', ...
 	'coordinate_global_max_error', ...

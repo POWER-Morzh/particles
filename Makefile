@@ -31,9 +31,9 @@ DIM=-DDim2
 
 # Configure Peano
 #----------------
-PROJECT_CFLAGS = #-DDebug -DAsserts 
+PROJECT_CFLAGS = #-DAsserts -DDebug 
 PROJECT_LFLAGS = 
-EXECUTABLE=bin/peano-Particles-F$(MUL_FACTOR)-M$(MANTISSA)
+EXECUTABLE=bin/peano-Particles#-F$(MUL_FACTOR)-M$(MANTISSA)
 #EXECUTABLE=peano-PoissonWithJacobi-debug
 
 
@@ -65,7 +65,7 @@ SYSTEM_LFLAGS = $(LINK_TBB)    $(LINK_MPI)
 # Settings for the GNU Compiler (Debug Mode)
 # ------------------------------------------
 CC=g++
-COMPILER_CFLAGS=-O0  -Wstrict-aliasing -fstrict-aliasing -ggdb -std=c++0x -DMANTISSA=$(MANTISSA) -DMUL_FACTOR=$(MUL_FACTOR)
+COMPILER_CFLAGS=-O0  -Wstrict-aliasing -fstrict-aliasing -ggdb -std=c++0x #-DMANTISSA=$(MANTISSA) -DMUL_FACTOR=$(MUL_FACTOR)
 #-pedantic -pedantic-errors -Wall -Werror
 
 # Settings for the GNU Compiler (Release Mode)

@@ -17,6 +17,7 @@
 #include "particles/pit/records/ParticleCompressed.h"
 
 #define N_INTERVALS_HISTOGRAM 21
+#define MUL_FACTOR 100
 
 
 
@@ -47,6 +48,7 @@ public:
 
     static std::ostringstream _maxRelativeErrorOut;
     static std::ostringstream _maxOffsetOut;
+    static std::ostringstream _minOffsetOut;
     static std::ostringstream _maxErrorOut;
     static std::ostringstream _RMSDOut;
     static std::ostringstream _L2NormOut;
@@ -56,8 +58,15 @@ public:
     /*
      * Process Histogram Data
      */
-    static void writeHistogramData( const std::string& filename, const bool& writeFirstTime );
-    static void processHistogram( const tarch::la::Vector<DIMENSIONS,double>& Norm );
+    static void writeHistogramData(
+      const std::string& filename,
+      const bool& writeFirstTime,
+      const tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> &histogram,
+      const double small_boundary, const double big_boundary );
+    static void processHistogram(
+      tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> &histogram,
+      const tarch::la::Vector<DIMENSIONS,double>& norm,
+      double big_bound, double small_bound );
 
     static void printParticlesInfo( const particles::pit::Cell& fineGridCell, const std::string normName, const tarch::la::Vector<DIMENSIONS, double> norm );
 
@@ -70,7 +79,9 @@ public:
      */
     static tarch::la::Vector<DIMENSIONS, double> computeRMSD( const particles::pit::Cell& fineGridCell );
     static double computeMaxRelativeError( const particles::pit::Cell& fineGridCell );
+    /* Compute max absolute Offset of Velocity */
     static double computeMaxOffset( const particles::pit::Cell& fineGridCell );
+    static double computeMinOffset( const particles::pit::Cell& fineGridCell );
     static double computeMaxError( const particles::pit::Cell& fineGridCell );
     static tarch::la::Vector<DIMENSIONS, double> computeL2ErrorNorm( const particles::pit::Cell& fineGridCell );
     static tarch::la::Vector<DIMENSIONS, double> computeL2Norm( const particles::pit::Cell& fineGridCell );

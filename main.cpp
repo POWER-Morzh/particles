@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
     logInfo( "main()", "quit with error code " << programExitCode );
   }
 
+  std::cout << "Simulation complete" << std::endl;
   peano::shutdownParallelEnvironment();
   peano::shutdownSharedMemoryEnvironment();
 

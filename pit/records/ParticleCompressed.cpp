@@ -1,6 +1,6 @@
 #include "particles/pit/records/ParticleCompressed.h"
 
-//#define MANTISSA 8
+#define MANTISSA 10
 #if defined MANTISSA
 #warning "MANTISSA DEFINED as " MANTISSA
 #endif

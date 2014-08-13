@@ -28,24 +28,26 @@ namespace particles {
 
 class particles::pit::myfunctions::CoordinatesRepresentationChange {
   public:
-        static double _global_max_error;
-	static double _globalMaxRelativeError;
-	static double _globalMaxL2ErrorNorm;
-	static int _globalNormAdditions;
-	static tarch::la::Vector<DIMENSIONS, double> _globalL2ErrorNorm;
-	static int _iteration;
+    static tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> _histogramData;
 
-	static bool _outputInConsole;
+    static double _global_max_error;
+    static double _globalMaxRelativeError;
+    static double _globalMaxL2ErrorNorm;
+    static int _globalNormAdditions;
+    static tarch::la::Vector<DIMENSIONS, double> _globalL2ErrorNorm;
+    static int _iteration;
 
-	static std::ostringstream _maxRelativeErrorOut;
-	static std::ostringstream _maxOffsetOut;
-	static std::ostringstream _maxErrorOut;
-	static std::ostringstream _RMSDOut;
-	static std::ostringstream _L2NormOut;
-	static std::ostringstream _L2ErrorNormOut;
-	static std::ostringstream _MeanCoordinateOut;
+    static bool _outputInConsole;
 
-	static void printParticlesInfo( const particles::pit::Cell& fineGridCell, const std::string normName, const tarch::la::Vector<DIMENSIONS, double> norm );
+    static std::ostringstream _maxRelativeErrorOut;
+    static std::ostringstream _maxOffsetOut;
+    static std::ostringstream _maxErrorOut;
+    static std::ostringstream _RMSDOut;
+    static std::ostringstream _L2NormOut;
+    static std::ostringstream _L2ErrorNormOut;
+    static std::ostringstream _MeanCoordinateOut;
+
+    static void printParticlesInfo( const particles::pit::Cell& fineGridCell, const std::string normName, const tarch::la::Vector<DIMENSIONS, double> norm );
 
     static tarch::la::Vector<DIMENSIONS, double> computeMeanCoordinate( const ParticleHeap::HeapEntries& currentParticles, const int& size );
 
