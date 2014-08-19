@@ -1,6 +1,6 @@
 clear all;
 
-histogramData = load('../../../../histogramL2ErrorOffset');
+histogramData = load('../histogramL2ErrorOffset');
 % get boundarys from file
 boundary_data = histogramData(1,:);
 small_boundary = boundary_data(1);

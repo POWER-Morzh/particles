@@ -12,9 +12,6 @@
 #define HISTOGRAM_SMALL_BOUNDARY 1e-3
 #define HISTOGRAM_BIG_BOUNDARY 1e0
 
-
-tarch::la::Vector<N_INTERVALS_HISTOGRAM, int>
-  particles::pit::myfunctions::CoordinatesRepresentationChange::_histogramData(0);
 particles::pit::myfunctions::Histogram
   *particles::pit::myfunctions::CoordinatesRepresentationChange::l2_error_norm_histogram_(0);
 particles::pit::myfunctions::Histogram
@@ -314,8 +311,6 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxE
 
 void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteration() {
 
-  tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> zeroVector_N_INTERVALS_HISTOGRAM(0);
-  _histogramData = zeroVector_N_INTERVALS_HISTOGRAM;
   l2_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
     1e-8, 1e-4);
   max_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
@@ -389,10 +384,7 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
 
   static bool writeFirstTime = 1;
   // Write Histogram data
-  particles::pit::myfunctions::RepresentationChange::writeHistogramData(
-    "histogramL2ErrorOffsetCoordinate", writeFirstTime, _histogramData,
-    HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY);
-  l2_error_norm_histogram_->writeHistogramData("histogramL2ErrorOffset_Coordinate",
+  l2_error_norm_histogram_->writeHistogramData("histogramL2Error_Coordinate",
     writeFirstTime);
   max_error_norm_histogram_->writeHistogramData("histogramMaxError_Coordinate",
       writeFirstTime);
@@ -500,9 +492,6 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::ascend(
       _maxOffsetOut << maxOffset << " ";
 
       // Histogram process
-      particles::pit::myfunctions::RepresentationChange::processHistogram(
-        _histogramData, maxOffset,
-        HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY );
       l2_error_norm_histogram_->processHistogram(l2ErrorNorm);
       max_error_norm_histogram_->processHistogram(maxError);
       max_offset_norm_histogram_->processHistogram(maxOffset);

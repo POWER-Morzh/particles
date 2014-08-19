@@ -32,8 +32,7 @@ namespace particles {
 
 
 class particles::pit::myfunctions::RepresentationChange {
-public:
-    static tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> _histogramData;
+  public:
     static particles::pit::myfunctions::Histogram *l2_error_norm_histogram_;
     static particles::pit::myfunctions::Histogram *max_error_norm_histogram_;
     static particles::pit::myfunctions::Histogram *max_offset_norm_histogram_;
