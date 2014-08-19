@@ -9,11 +9,18 @@
 
 // I put it here because it is the easiest way to give it to processHistogram
 // and writeHistogram
-#define HISTOGRAM_SMALL_BOUNDARY 1e-7
-#define HISTOGRAM_BIG_BOUNDARY 1e-4
+#define HISTOGRAM_SMALL_BOUNDARY 1e-3
+#define HISTOGRAM_BIG_BOUNDARY 1e0
 
 
-tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> particles::pit::myfunctions::CoordinatesRepresentationChange::_histogramData(0);
+tarch::la::Vector<N_INTERVALS_HISTOGRAM, int>
+  particles::pit::myfunctions::CoordinatesRepresentationChange::_histogramData(0);
+particles::pit::myfunctions::Histogram
+  *particles::pit::myfunctions::CoordinatesRepresentationChange::l2_error_norm_histogram_(0);
+particles::pit::myfunctions::Histogram
+  *particles::pit::myfunctions::CoordinatesRepresentationChange::max_error_norm_histogram_(0);
+particles::pit::myfunctions::Histogram
+  *particles::pit::myfunctions::CoordinatesRepresentationChange::max_offset_norm_histogram_(0);
 
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_global_max_error = 0;
 double particles::pit::myfunctions::CoordinatesRepresentationChange::_globalMaxRelativeError = 0;
@@ -309,6 +316,12 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteratio
 
   tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> zeroVector_N_INTERVALS_HISTOGRAM(0);
   _histogramData = zeroVector_N_INTERVALS_HISTOGRAM;
+  l2_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
+    1e-8, 1e-4);
+  max_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
+      1e-7, 1e-4);
+  max_offset_norm_histogram_ = new particles::pit::myfunctions::Histogram(
+      1e-3, 1e0);
 
   _global_max_error = 0;
   _globalMaxRelativeError = 0;
@@ -343,6 +356,9 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::endIteration(
     }
 
   writeAllInFile();
+  delete l2_error_norm_histogram_;
+  delete max_error_norm_histogram_;
+  delete max_offset_norm_histogram_;
 
   ++_iteration;
 
@@ -376,18 +392,24 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::writeAllInFil
   particles::pit::myfunctions::RepresentationChange::writeHistogramData(
     "histogramL2ErrorOffsetCoordinate", writeFirstTime, _histogramData,
     HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY);
+  l2_error_norm_histogram_->writeHistogramData("histogramL2ErrorOffset_Coordinate",
+    writeFirstTime);
+  max_error_norm_histogram_->writeHistogramData("histogramMaxError_Coordinate",
+      writeFirstTime);
+  max_offset_norm_histogram_->writeHistogramData("histogramMaxOffset_Coordinate",
+      writeFirstTime);
 
   // Write globalL2Norm
-  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
+//  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxL2ErrorNorm
-  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm", _globalMaxL2ErrorNorm, writeFirstTime );
+//  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxL2ErrorNorm", _globalMaxL2ErrorNorm, writeFirstTime );
 
   // Write _globalMaxRelativeError
   //particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinateGlobalMaxRelativeError", _globalMaxRelativeError, writeFirstTime );
 
   // Write _globalMaxRelativeError
-  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinate_global_max_error", _global_max_error, writeFirstTime );
+//  particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( "coordinate_global_max_error", _global_max_error, writeFirstTime );
   writeFirstTime = 0;
 }
 
@@ -479,8 +501,11 @@ void particles::pit::myfunctions::CoordinatesRepresentationChange::ascend(
 
       // Histogram process
       particles::pit::myfunctions::RepresentationChange::processHistogram(
-          _histogramData, l2ErrorNorm,
-          HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY );
+        _histogramData, maxOffset,
+        HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY );
+      l2_error_norm_histogram_->processHistogram(l2ErrorNorm);
+      max_error_norm_histogram_->processHistogram(maxError);
+      max_offset_norm_histogram_->processHistogram(maxOffset);
 
       for(int d=0; d<DIMENSIONS; d++) {
         _RMSDOut << rmsd[d] << " ";

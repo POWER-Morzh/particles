@@ -11,18 +11,27 @@
 #define VERBOSE 0
 // I put it here because it is the easiest way to give it to processHistogram
 // and writeHistogram
-#define HISTOGRAM_SMALL_BOUNDARY 1e-6
+#define HISTOGRAM_SMALL_BOUNDARY 1e-7
 #define HISTOGRAM_BIG_BOUNDARY 1e-3
 
-tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> particles::pit::myfunctions::RepresentationChange::_histogramData(0);
+tarch::la::Vector<N_INTERVALS_HISTOGRAM, int>
+  particles::pit::myfunctions::RepresentationChange::_histogramData(0);
+particles::pit::myfunctions::Histogram
+  *particles::pit::myfunctions::RepresentationChange::l2_error_norm_histogram_(0);
+particles::pit::myfunctions::Histogram
+  *particles::pit::myfunctions::RepresentationChange::max_error_norm_histogram_(0);
+particles::pit::myfunctions::Histogram
+  *particles::pit::myfunctions::RepresentationChange::max_offset_norm_histogram_(0);
 
 double particles::pit::myfunctions::RepresentationChange::_global_max_error = 0;
 double particles::pit::myfunctions::RepresentationChange::_globalMaxOffset = 0;
 double particles::pit::myfunctions::RepresentationChange::_globalMaxRelativeError = 0;
 double particles::pit::myfunctions::RepresentationChange::_globalMaxL2ErrorNorm = 0;
 int particles::pit::myfunctions::RepresentationChange::_globalNormAdditions = 0;
-tarch::la::Vector<DIMENSIONS, double> particles::pit::myfunctions::RepresentationChange::_globalL2ErrorNorm(0);
-tarch::la::Vector<DIMENSIONS, double> particles::pit::myfunctions::RepresentationChange::_globalL2OffsetNorm(0);
+tarch::la::Vector<DIMENSIONS, double>
+  particles::pit::myfunctions::RepresentationChange::_globalL2ErrorNorm(0);
+tarch::la::Vector<DIMENSIONS, double>
+  particles::pit::myfunctions::RepresentationChange::_globalL2OffsetNorm(0);
 
 int particles::pit::myfunctions::RepresentationChange::_iteration = 0;
 
@@ -77,7 +86,7 @@ void particles::pit::myfunctions::RepresentationChange::processHistogram(
   assertion(small_bound < big_bound);
   double check = small_bound;
   double oneStep = pow(big_bound/small_bound, 1.0/(N_INTERVALS_HISTOGRAM-3)); // We subtract 3 because two places already reserved
-  std::cout << "oneStep: " << oneStep << std::endl;
+//  std::cout << "oneStep: " << oneStep << std::endl;
   //std::cout << "processHistogram(), oneStep=" << oneStep << std::endl;
   //std::cout << "processHistogram(), n_intervals=" << N_INTERVALS_HISTOGRAM << std::endl;
 
@@ -100,14 +109,14 @@ void particles::pit::myfunctions::RepresentationChange::processHistogram(
           break;
         }
       }
-std::cout << "CHECK:\n";
-      check = small_bound;
-      for(int i = 1; i< N_INTERVALS_HISTOGRAM-1; i++) {
-        check *= oneStep;
-        std::cout << check << " ";
-
-      }
-std::cout << std::endl;
+//std::cout << "CHECK:\n";
+//      check = small_bound;
+//      for(int i = 1; i< N_INTERVALS_HISTOGRAM-1; i++) {
+//        check *= oneStep;
+//        std::cout << check << " ";
+//
+//      }
+//std::cout << std::endl;
       if(norm[d] >= check && norm[d] <big_bound) {
         // If we came here it means that we did not save data
         std::cout << "processHistogram() - ERROR -  we didn't save data about Norm in _histogramData for: " << norm[d] << std::endl;
@@ -118,7 +127,11 @@ std::cout << std::endl;
 }
 
 
-void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(const particles::pit::Cell& fineGridCell, const std::string normName, const tarch::la::Vector<DIMENSIONS, double> norm ) {
+void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(
+  const particles::pit::Cell& fineGridCell,
+  const std::string normName,
+  const tarch::la::Vector<DIMENSIONS, double> norm
+) {
   const int cellIndex = fineGridCell.getCellIndex();
   const int NumberOfParticles = ParticleHeap::getInstance().getData(cellIndex).size();
 
@@ -201,8 +214,9 @@ void particles::pit::myfunctions::RepresentationChange::printParticlesInfo(const
   }
 }
 
-void particles::pit::myfunctions::RepresentationChange::leaveCell(particles::pit::Cell& fineGridCell) {
-
+void particles::pit::myfunctions::RepresentationChange::leaveCell(
+  particles::pit::Cell& fineGridCell
+) {
   //std::cout <<"leaveCell()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << MANTISSA << std::endl;
 
   const int cellIndex = fineGridCell.getCellIndex();
@@ -489,6 +503,12 @@ void particles::pit::myfunctions::RepresentationChange::beginIteration() {
 
   tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> zeroVector_N_INTERVALS_HISTOGRAM(0);
   _histogramData = zeroVector_N_INTERVALS_HISTOGRAM;
+  l2_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
+    1e-7, 1e-3);
+  max_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
+      1e-7, 1e-3);
+  max_offset_norm_histogram_ = new particles::pit::myfunctions::Histogram(
+      1e-3, 1e0);
 
   _global_max_error = 0;
   _globalMaxOffset = 0;
@@ -529,6 +549,9 @@ void particles::pit::myfunctions::RepresentationChange::endIteration() {
   }
 
   writeAllInFile();
+  delete l2_error_norm_histogram_;
+  delete max_error_norm_histogram_;
+  delete max_offset_norm_histogram_;
 
   ++_iteration;
 
@@ -562,8 +585,14 @@ void particles::pit::myfunctions::RepresentationChange::writeAllInFile() {
 
   static bool writeFirstTime = 1;
   // Write Histogram data
-  writeHistogramData( "histogramL2ErrorOffset", writeFirstTime, _histogramData,
+  writeHistogramData( "histogramL2ErrorOffset2", writeFirstTime, _histogramData,
       HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY);
+  l2_error_norm_histogram_->writeHistogramData("histogramL2ErrorOffset",
+    writeFirstTime);
+  max_error_norm_histogram_->writeHistogramData("histogramMaxError",
+      writeFirstTime);
+  max_offset_norm_histogram_->writeHistogramData("histogramMaxOffset",
+      writeFirstTime);
 
   // Write globalL2ErrorNorm
 //  writeGlobalNorm( "globalL2ErrorNorm", _globalL2ErrorNorm, writeFirstTime );
@@ -587,7 +616,11 @@ void particles::pit::myfunctions::RepresentationChange::writeAllInFile() {
 }
 
 
-void particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( const std::string& filename, const tarch::la::Vector<DIMENSIONS,double>& Norm, const bool& writeFirstTime ) {
+void particles::pit::myfunctions::RepresentationChange::writeGlobalNorm(
+  const std::string& filename,
+  const tarch::la::Vector<DIMENSIONS,double>& Norm,
+  const bool& writeFirstTime
+) {
   std::ostringstream full_file_name;
   full_file_name << filename;// << "-F" << (MUL_FACTOR/2.0) << "-M" << MANTISSA << ".dat";
   std::ofstream out;
@@ -606,7 +639,10 @@ void particles::pit::myfunctions::RepresentationChange::writeGlobalNorm( const s
 }
 
 
-void particles::pit::myfunctions::RepresentationChange::writeNorm( const std::string& normName, const std::ostringstream& normData ) {
+void particles::pit::myfunctions::RepresentationChange::writeNorm(
+  const std::string& normName,
+  const std::ostringstream& normData
+) {
   std::ostringstream normFileName;
   normFileName << normName
    		       << "-" << _iteration
@@ -627,7 +663,13 @@ void particles::pit::myfunctions::RepresentationChange::ascend(
   const peano::grid::VertexEnumerator&          coarseGridVerticesEnumerator,
   particles::pit::Cell&           coarseGridCell
 ) {
-  particles::pit::myfunctions::CoordinatesRepresentationChange::ascend( fineGridCells, fineGridVertices, fineGridVerticesEnumerator, coarseGridVertices, coarseGridVerticesEnumerator, coarseGridCell );
+  particles::pit::myfunctions::CoordinatesRepresentationChange::ascend(
+    fineGridCells,
+    fineGridVertices,
+    fineGridVerticesEnumerator,
+    coarseGridVertices,
+    coarseGridVerticesEnumerator,
+    coarseGridCell);
 
   dfor3(k)
     particles::pit::Cell fineGridCell = fineGridCells[ fineGridVerticesEnumerator.cell(k) ];
@@ -656,8 +698,10 @@ void particles::pit::myfunctions::RepresentationChange::ascend(
       // Compute RMSD
       tarch::la::Vector<DIMENSIONS,double> rmsd = computeRMSD( fineGridCell );
       // Computer L2-Norm
-      tarch::la::Vector<DIMENSIONS,double> l2ErrorNorm = computeL2ErrorNorm( fineGridCell );
-      tarch::la::Vector<DIMENSIONS,double> l2Norm = computeL2Norm( fineGridCell );
+      tarch::la::Vector<DIMENSIONS,double>
+        l2ErrorNorm = computeL2ErrorNorm( fineGridCell );
+      tarch::la::Vector<DIMENSIONS,double>
+        l2Norm = computeL2Norm( fineGridCell );
       //std::cout << "ascend() l2ErrorNorm: " << l2ErrorNorm << std::endl;
 
 
@@ -671,8 +715,8 @@ void particles::pit::myfunctions::RepresentationChange::ascend(
       _globalL2ErrorNorm += l2ErrorNorm;
       // Add l2Norm to _globalL2OffsetNorm
       _globalL2OffsetNorm += l2Norm;
-      // Don't forget to increment _globalNormAdditions to divide _globalL2Norm by it
-      // at the end of iteration before writing it in the file!
+      // Don't forget to increment _globalNormAdditions to divide _globalL2Norm
+      //by it at the end of iteration before writing it in the file!
       ++_globalNormAdditions;
 
 
@@ -690,6 +734,9 @@ void particles::pit::myfunctions::RepresentationChange::ascend(
       // Histogram process
       processHistogram( _histogramData, l2ErrorNorm,
         HISTOGRAM_SMALL_BOUNDARY, HISTOGRAM_BIG_BOUNDARY );
+      l2_error_norm_histogram_->processHistogram(l2ErrorNorm);
+      max_error_norm_histogram_->processHistogram(maxError);
+      max_offset_norm_histogram_->processHistogram(maxOffset);
 
       for(int d=0; d<DIMENSIONS; d++) {
         _RMSDOut << rmsd[d] << " ";
