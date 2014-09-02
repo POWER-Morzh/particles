@@ -21,7 +21,6 @@
 #define MUL_FACTOR 100
 
 
-
 namespace particles {
   namespace pit {
     namespace myfunctions {
@@ -58,18 +57,6 @@ class particles::pit::myfunctions::RepresentationChange {
     static std::ostringstream _L2ErrorNormOut;
     static std::ostringstream _meanVelocityOut;
 
-    /*
-     * Process Histogram Data
-     */
-    static void writeHistogramData(
-      const std::string& filename,
-      const bool& writeFirstTime,
-      const tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> &histogram,
-      const double small_boundary, const double big_boundary );
-    static void processHistogram(
-      tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> &histogram,
-      const tarch::la::Vector<DIMENSIONS,double>& norm,
-      double big_bound, double small_bound );
 
     static void printParticlesInfo( const particles::pit::Cell& fineGridCell, const std::string normName, const tarch::la::Vector<DIMENSIONS, double> norm );
 
@@ -98,7 +85,7 @@ class particles::pit::myfunctions::RepresentationChange {
     /*
      * Skip value of globalL2Norm to 0 to start new iteration.
      */
-    static void beginIteration();
+    static void beginIteration(particles::pit::State&  solverState);
 
     /*
      * Increment number of iterations and write all Data in file.

@@ -1,6 +1,7 @@
 #include "particles/pit/mappings/RandomParticleDistribution.h"
 #include "peano/grid/aspects/VertexStateAnalysis.h"
 #include "tarch/multicore/MulticoreDefinitions.h"
+#include <random>
 
 
 //#include "particles/pit/myfunctions/RepresentationChange.h"
@@ -67,6 +68,13 @@ void particles::pit::mappings::RandomParticleDistribution::initCell(
     );
 
   const double velocityScaling = _state.getMaximalInitialVelocity() / std::sqrt( static_cast<double>(DIMENSIONS) );
+
+//  static std::default_random_engine generator;
+//  double mu = velocityScaling/2;
+//  double sigma = mu/3;
+//  static std::normal_distribution<double> distribution(mu,sigma);
+//  int velocity_sign;
+
   if (placeParticlesHere) {
     assertion(!fineGridCell.isRoot());
 
@@ -74,7 +82,6 @@ void particles::pit::mappings::RandomParticleDistribution::initCell(
       fineGridVerticesEnumerator.getCellSize(),
       _state.getMaximalNumberOfInitialParticlesPerUnitVolume()
     );
-//std::cout << "RandomParticleDistibution() NumberOfParticles: " << NumberOfParticles << std::endl;
     NumberOfParticles = NumberOfParticles==0 ? 1 : NumberOfParticles;
 
     logDebug( "enterCell(...)", "insert " << NumberOfParticles << " particle(s) into cell at " << fineGridVerticesEnumerator.toString() << " for density " << _state.getMaximalNumberOfInitialParticlesPerUnitVolume() );
@@ -83,20 +90,16 @@ void particles::pit::mappings::RandomParticleDistribution::initCell(
       particles::pit::records::Particle newParticle;
       for (int d=0; d<DIMENSIONS; d++) {
         newParticle._persistentRecords._x(d) = static_cast<double>(rand())/static_cast<double>(RAND_MAX) * fineGridVerticesEnumerator.getCellSize()(d) + fineGridVerticesEnumerator.getVertexPosition()(d);
-        newParticle._persistentRecords._v(d) = (static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0 - 1.0) * velocityScaling;
+        if(d != 0)
+          newParticle._persistentRecords._v(d) = (static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0 - 1.0) * velocityScaling;
+        else
+          newParticle._persistentRecords._v(d) = (static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0 + 1.0) * velocityScaling;
+//        velocity_sign = rand() % 2 == 1 ? 1 : -1;
+//        newParticle._persistentRecords._v(d) = velocity_sign*distribution(generator);
       }
-//std::cout << "RandomParticleDistibution() V: " << newParticle._persistentRecords._v << std::endl;
       ParticleHeap::getInstance().getData(cellIndex).push_back(newParticle);
 
     }
-    //static int myInt = 1;
-    //std::ofstream myout;
-    //myout.open( "myFile" );
-    //if ( (!myout.fail()) && myout.is_open() ) {
-    //	myout << myInt << std::endl;
-    //}
-    //std::cout << "cellIndex: " << cellIndex << "; NumberOfParticles: " << NumberOfParticles <<std::endl;
-    //++myInt;
 
   }
 }

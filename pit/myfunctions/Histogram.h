@@ -10,6 +10,7 @@
 
 #include "peano/utils/Dimensions.h"
 #include "tarch/la/Vector.h"
+#include "particles/pit/State.h"
 
 #define N_INTERVALS_HISTOGRAM 21
 
@@ -24,18 +25,25 @@ namespace particles {
 class particles::pit::myfunctions::Histogram {
  public:
   Histogram(
+      particles::pit::State&  solverState,
     const double small_boundary=1e-7,
     const double big_boundary=1e-3);
+  Histogram(
+    particles::pit::State&  solverState,
+    const int small_boundary=-7,
+    const int big_boundary=-1);
   virtual ~Histogram();
 
   void processHistogram(const tarch::la::Vector<DIMENSIONS,double>& norm);
+  void processHistogram10(const tarch::la::Vector<DIMENSIONS,double>& norm);
   void writeHistogramData(
     const std::string& filename,
     const bool writeFirstTime=true);
  private:
   const double small_boundary_;
   const double big_boundary_;
-  tarch::la::Vector<N_INTERVALS_HISTOGRAM, int> histogram_data_;
+  State state_;
+  std::vector<int> histogram_data_;
 };
 
 #endif /* HISTOGRAM_H_ */

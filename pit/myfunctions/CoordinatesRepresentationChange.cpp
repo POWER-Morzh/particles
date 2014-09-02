@@ -309,14 +309,14 @@ double particles::pit::myfunctions::CoordinatesRepresentationChange::computeMaxE
 }
 
 
-void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteration() {
+void particles::pit::myfunctions::CoordinatesRepresentationChange::beginIteration(particles::pit::State&  solverState) {
 
   l2_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
-    1e-8, 1e-4);
+      solverState, 1e-8, 1e-4);
   max_error_norm_histogram_ = new particles::pit::myfunctions::Histogram(
-      1e-7, 1e-4);
+      solverState, 1e-7, 1e-4);
   max_offset_norm_histogram_ = new particles::pit::myfunctions::Histogram(
-      1e-3, 1e0);
+      solverState, 1e-3, 1e0);
 
   _global_max_error = 0;
   _globalMaxRelativeError = 0;

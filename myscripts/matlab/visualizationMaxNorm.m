@@ -1,6 +1,9 @@
 clear all;
 
-maxNorm = load('../maxOffset-24.dat');
+source_path = '../../../../';
+filename = 'maxError-24.dat';
+
+maxNorm = load([source_path filename]);
 
 x = sort(maxNorm(:, 2)');
 y = sort(maxNorm(:, 3)');

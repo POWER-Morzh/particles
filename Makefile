@@ -31,7 +31,7 @@ DIM=-DDim2
 
 # Configure Peano
 #----------------
-PROJECT_CFLAGS = #-DAsserts -DDebug 
+PROJECT_CFLAGS = #-DAsserts #-DDebug 
 PROJECT_LFLAGS = 
 EXECUTABLE=bin/peano-Particles#-F$(MUL_FACTOR)-M$(MANTISSA)
 #EXECUTABLE=peano-PoissonWithJacobi-debug

@@ -118,6 +118,7 @@ particles::ExperimentSettingsProduceVideo::ExperimentSettingsProduceVideo(double
 
   numberOfTimeSteps      = 5.0 / dt;
   maximalInitialVelocity = 1.0;
+//  maximalInitialVelocity = 0.1;
 
   timeSteppingAdapter = ExplicitEulerWithPlot;
 
@@ -172,7 +173,8 @@ particles::ExperimentSettingsHomogeneousParticles::ExperimentSettingsHomogeneous
   runnerVariant = Simulation;
 
   numberOfTimeSteps      = 50;
-  maximalInitialVelocity = 1.0;
+//  maximalInitialVelocity = 1.0;
+  maximalInitialVelocity = 0.1;
 
   timeSteppingAdapter = ExplicitEuler;
 

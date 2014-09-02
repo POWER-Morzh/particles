@@ -73,7 +73,7 @@ class particles::pit::myfunctions::CoordinatesRepresentationChange {
     /*
      * Skip value of globalL2Norm to 0 to start new iteration.
      */
-    static void beginIteration();
+    static void beginIteration(particles::pit::State&  solverState);
 
     /*
      * Increment number of iterations and write all Data in file.

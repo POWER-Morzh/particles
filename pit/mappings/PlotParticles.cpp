@@ -360,7 +360,7 @@ void particles::pit::mappings::PlotParticles::beginIteration(
 
   _particleVelocityWriter = _vtkWriter->createPointDataWriter("Velocity", DIMENSIONS);
 
-  particles::pit::myfunctions::RepresentationChange::beginIteration();
+  particles::pit::myfunctions::RepresentationChange::beginIteration(solverState);
 
   logTraceOutWith1Argument( "beginIteration(State)", solverState);
 }
