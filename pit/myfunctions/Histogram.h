@@ -24,14 +24,20 @@ namespace particles {
 
 class particles::pit::myfunctions::Histogram {
  public:
+
+  /**
+   * If number_intervals==0 then it will create a histogram with distances of 10.
+   */
   Histogram(
       particles::pit::State&  solverState,
     const double small_boundary=1e-7,
-    const double big_boundary=1e-3);
+    const double big_boundary=1e-3,
+    const int number_intervals=0);
   Histogram(
     particles::pit::State&  solverState,
     const int small_boundary=-7,
-    const int big_boundary=-1);
+    const int big_boundary=-3,
+    const int number_intervals=0);
   virtual ~Histogram();
 
   void processHistogram(const tarch::la::Vector<DIMENSIONS,double>& norm);

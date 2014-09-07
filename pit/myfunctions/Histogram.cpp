@@ -17,26 +17,36 @@
 particles::pit::myfunctions::Histogram::Histogram(
   particles::pit::State&  solverState,
   const double small_boundary /*=1e-7*/,
-  const double big_boundary /*=1e-3*/)
+  const double big_boundary, /*=1e-3*/
+  const int number_intervals /*=6*/)
   : small_boundary_(small_boundary),
     big_boundary_(big_boundary)
 {
   assertion(small_boundary < big_boundary);
   state_ = solverState;
-  histogram_data_.resize(N_INTERVALS_HISTOGRAM,0);
+  if(number_intervals) {
+    histogram_data_.resize(number_intervals,0);
+  } else {
+    histogram_data_.resize(log10(big_boundary)-log10(small_boundary)+2,0);
+  }
 }
 
 
 particles::pit::myfunctions::Histogram::Histogram(
   particles::pit::State&  solverState,
   const int small_boundary /*=-7*/,
-  const int big_boundary /*=-1*/)
+  const int big_boundary, /*=-3*/
+  const int number_intervals /*=6*/)
   : small_boundary_(pow(10,small_boundary)),
     big_boundary_(pow(10,big_boundary))
 {
   assertion(small_boundary < big_boundary);
   state_ = solverState;
-  histogram_data_.resize(big_boundary-small_boundary+2,0);
+  if(number_intervals) {
+    histogram_data_.resize(number_intervals,0);
+  } else {
+    histogram_data_.resize(big_boundary-small_boundary+2,0);
+  }
 }
 
 
@@ -50,7 +60,6 @@ void particles::pit::myfunctions::Histogram::processHistogram(
 ) {
   double check = small_boundary_;
   double oneStep = pow(big_boundary_/small_boundary_, 1.0/(histogram_data_.size()-2)); // We subtract 2 because two places already reserved
-  std::cout << histogram_data_.size() << " " << oneStep << std::endl;
 
   // We save the data in increasing order.
 
