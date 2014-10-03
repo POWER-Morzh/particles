@@ -69,11 +69,11 @@ void particles::pit::mappings::RandomParticleDistribution::initCell(
 
   const double velocityScaling = _state.getMaximalInitialVelocity() / std::sqrt( static_cast<double>(DIMENSIONS) );
 
-  static std::default_random_engine generator;
-  double mu = velocityScaling/2;
-  double sigma = mu/3;
-  static std::normal_distribution<double> distribution(mu,sigma);
-  int velocity_sign;
+//  static std::default_random_engine generator;
+//  double mu = velocityScaling/2;
+//  double sigma = mu/3;
+//  static std::normal_distribution<double> distribution(mu,sigma);
+//  int velocity_sign;
 
   if (placeParticlesHere) {
     assertion(!fineGridCell.isRoot());
@@ -92,11 +92,11 @@ void particles::pit::mappings::RandomParticleDistribution::initCell(
         newParticle._persistentRecords._x(d) = static_cast<double>(rand())/static_cast<double>(RAND_MAX) * fineGridVerticesEnumerator.getCellSize()(d) + fineGridVerticesEnumerator.getVertexPosition()(d);
 //        if(d != 0)
 //        if(true)
-//          newParticle._persistentRecords._v(d) = (static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0 - 1.0) * velocityScaling;
+          newParticle._persistentRecords._v(d) = (static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0 - 1.0) * velocityScaling;
 //        else
 //          newParticle._persistentRecords._v(d) = (static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0 + 1.0) * velocityScaling;
-        velocity_sign = rand() % 2 == 1 ? 1 : -1;
-        newParticle._persistentRecords._v(d) = velocity_sign*distribution(generator);
+//        velocity_sign = rand() % 2 == 1 ? 1 : -1;
+//        newParticle._persistentRecords._v(d) = velocity_sign*distribution(generator);
       }
       ParticleHeap::getInstance().getData(cellIndex).push_back(newParticle);
 

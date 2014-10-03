@@ -58,6 +58,8 @@ class particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0 {
     tarch::plotter::griddata::Writer::VertexDataWriter*                             _vertexAdjacentCellsHeight;
 
     tarch::plotter::griddata::Writer::CellDataWriter*                               _cellStateWriter;
+    tarch::plotter::griddata::Writer::CellDataWriter*                               _cellNormWriterX;
+    tarch::plotter::griddata::Writer::CellDataWriter*                               _cellNormWriterY;
     
     static int _snapshotCounter;
     

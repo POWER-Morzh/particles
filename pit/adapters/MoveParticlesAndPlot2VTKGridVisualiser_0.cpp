@@ -53,7 +53,9 @@ particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::MoveParticle
   _vertexTypeWriter(0),
   _vertexRefinementControlWriter(0),
   _vertexAdjacentCellsHeight(0),
-  _cellStateWriter(0) {
+  _cellStateWriter(0),
+  _cellNormWriterX(0),
+  _cellNormWriterY(0){
 }
 
 
@@ -405,6 +407,8 @@ void particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::leaveCe
     }
     
     _cellStateWriter->plotCell(cellIndex,fineGridVerticesEnumerator.getCellFlags());
+    _cellNormWriterX->plotCell(cellIndex,(fineGridCell.getMeanVelocity())[0]);
+    _cellNormWriterY->plotCell(cellIndex,(fineGridCell.getMeanVelocity())[1]);
   }
 }
 
@@ -424,6 +428,8 @@ void particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::beginIt
   _vertexAdjacentCellsHeight      = _vtkWriter->createVertexDataWriter( peano::grid::getCellFlagsLegend(),1);
 
   _cellStateWriter                = _vtkWriter->createCellDataWriter( "cell-flag(>=-1=stationary,-1=parallel-boundary,<=-2=not-stationary" ,1);
+  _cellNormWriterX                = _vtkWriter->createCellDataWriter( "Norm,X-direction" ,1);
+  _cellNormWriterY                = _vtkWriter->createCellDataWriter( "Norm,Y-direction" ,1);
 }
 
 
@@ -437,6 +443,8 @@ void particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::endIter
   _vertexRefinementControlWriter->close();
   _vertexAdjacentCellsHeight->close();
   _cellStateWriter->close();
+  _cellNormWriterX->close();
+  _cellNormWriterY->close();
   
   delete _vertexWriter;
   delete _cellWriter;
@@ -444,6 +452,8 @@ void particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::endIter
   delete _vertexRefinementControlWriter;
   delete _vertexAdjacentCellsHeight;
   delete _cellStateWriter;
+  delete _cellNormWriterX;
+  delete _cellNormWriterY;
   
   _vertexWriter                  = 0;
   _cellWriter                    = 0;
@@ -451,6 +461,8 @@ void particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::endIter
   _vertexRefinementControlWriter = 0;
   _vertexAdjacentCellsHeight     = 0;
   _cellStateWriter               = 0;
+  _cellNormWriterX               = 0;
+  _cellNormWriterY               = 0;
   
   std::ostringstream snapshotFileName;
   snapshotFileName << "grid"

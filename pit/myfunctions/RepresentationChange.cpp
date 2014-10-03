@@ -493,7 +493,7 @@ void particles::pit::myfunctions::RepresentationChange::writeAllInFile() {
   //writeNorm( "L2Norm", _L2NormOut );
 
   // Write meanVelocity
-  //writeNorm( "meanVelocity", _meanVelocityOut );
+  writeNorm( "meanVelocity", _meanVelocityOut );
 
   static bool writeFirstTime = 1;
   // Write Histogram data
