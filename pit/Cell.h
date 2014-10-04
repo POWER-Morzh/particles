@@ -139,6 +139,18 @@ class particles::pit::Cell: public peano::grid::Cell< particles::pit::records::C
      * This operation sets the mean velocity only for leaf cells with particles.
      */
     void setMeanCoordinate(const tarch::la::Vector<DIMENSIONS, double>& meanVelocity);
+
+    /*
+     * Get the norm which we saved in this sell
+     */
+    tarch::la::Vector<DIMENSIONS, double> getMyNorm() const;
+
+    /**
+     * Set some norm(which we want) in this sell
+     *
+     * This operation sets the mean velocity only for leaf cells with particles.
+     */
+    void setMyNorm(const tarch::la::Vector<DIMENSIONS, double>& myNorm);
 };
 
 

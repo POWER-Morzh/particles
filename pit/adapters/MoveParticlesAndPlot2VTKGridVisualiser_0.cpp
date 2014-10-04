@@ -407,8 +407,8 @@ void particles::pit::adapters::MoveParticlesAndPlot2VTKGridVisualiser_0::leaveCe
     }
     
     _cellStateWriter->plotCell(cellIndex,fineGridVerticesEnumerator.getCellFlags());
-    _cellNormWriterX->plotCell(cellIndex,(fineGridCell.getMeanVelocity())[0]);
-    _cellNormWriterY->plotCell(cellIndex,(fineGridCell.getMeanVelocity())[1]);
+    _cellNormWriterX->plotCell(cellIndex,(fineGridCell.getMyNorm())[0]);
+    _cellNormWriterY->plotCell(cellIndex,(fineGridCell.getMyNorm())[1]);
   }
 }
 

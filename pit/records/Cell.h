@@ -36,7 +36,7 @@ namespace particles {
     *
     * 		   build date: 09-02-2014 14:40
     *
-    * @date   28/04/2014 17:39
+    * @date   03/10/2014 14:47
     */
    class particles::pit::records::Cell { 
       
@@ -60,6 +60,11 @@ namespace particles {
             #else
             tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
             #endif
+            #ifdef UseManualAlignment
+            tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+            #else
+            tarch::la::Vector<DIMENSIONS,double> _myNorm;
+            #endif
             bool _isInside;
             State _state;
             #ifdef UseManualAlignment
@@ -82,7 +87,7 @@ namespace particles {
             /**
              * Generated
              */
-            PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+            PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
             
             
             inline int getCellIndex() const 
@@ -217,6 +222,64 @@ namespace particles {
  #endif 
  {
                _meanCoordinate = (meanCoordinate);
+            }
+            
+            
+            
+            /**
+             * Generated and optimized
+             * 
+             * If you realise a for loop using exclusively arrays (vectors) and compile 
+             * with -DUseManualAlignment you may add 
+             * \code
+             #pragma vector aligned
+             #pragma simd
+             \endcode to this for loop to enforce your compiler to use SSE/AVX.
+             * 
+             * The alignment is tied to the unpacked records, i.e. for packed class
+             * variants the machine's natural alignment is switched off to recude the  
+             * memory footprint. Do not use any SSE/AVX operations or 
+             * vectorisation on the result for the packed variants, as the data is misaligned. 
+             * If you rely on vectorisation, convert the underlying record 
+             * into the unpacked version first. 
+             * 
+             * @see convert()
+             */
+            inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+               return _myNorm;
+            }
+            
+            
+            
+            /**
+             * Generated and optimized
+             * 
+             * If you realise a for loop using exclusively arrays (vectors) and compile 
+             * with -DUseManualAlignment you may add 
+             * \code
+             #pragma vector aligned
+             #pragma simd
+             \endcode to this for loop to enforce your compiler to use SSE/AVX.
+             * 
+             * The alignment is tied to the unpacked records, i.e. for packed class
+             * variants the machine's natural alignment is switched off to recude the  
+             * memory footprint. Do not use any SSE/AVX operations or 
+             * vectorisation on the result for the packed variants, as the data is misaligned. 
+             * If you rely on vectorisation, convert the underlying record 
+             * into the unpacked version first. 
+             * 
+             * @see convert()
+             */
+            inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+               _myNorm = (myNorm);
             }
             
             
@@ -437,12 +500,12 @@ namespace particles {
          /**
           * Generated
           */
-         Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+         Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
          
          /**
           * Generated
           */
-         Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+         Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
          
          /**
           * Generated
@@ -653,6 +716,90 @@ namespace particles {
             assertion(elementIndex>=0);
             assertion(elementIndex<DIMENSIONS);
             _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+            
+         }
+         
+         
+         
+         /**
+          * Generated and optimized
+          * 
+          * If you realise a for loop using exclusively arrays (vectors) and compile 
+          * with -DUseManualAlignment you may add 
+          * \code
+          #pragma vector aligned
+          #pragma simd
+          \endcode to this for loop to enforce your compiler to use SSE/AVX.
+          * 
+          * The alignment is tied to the unpacked records, i.e. for packed class
+          * variants the machine's natural alignment is switched off to recude the  
+          * memory footprint. Do not use any SSE/AVX operations or 
+          * vectorisation on the result for the packed variants, as the data is misaligned. 
+          * If you rely on vectorisation, convert the underlying record 
+          * into the unpacked version first. 
+          * 
+          * @see convert()
+          */
+         inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+            return _persistentRecords._myNorm;
+         }
+         
+         
+         
+         /**
+          * Generated and optimized
+          * 
+          * If you realise a for loop using exclusively arrays (vectors) and compile 
+          * with -DUseManualAlignment you may add 
+          * \code
+          #pragma vector aligned
+          #pragma simd
+          \endcode to this for loop to enforce your compiler to use SSE/AVX.
+          * 
+          * The alignment is tied to the unpacked records, i.e. for packed class
+          * variants the machine's natural alignment is switched off to recude the  
+          * memory footprint. Do not use any SSE/AVX operations or 
+          * vectorisation on the result for the packed variants, as the data is misaligned. 
+          * If you rely on vectorisation, convert the underlying record 
+          * into the unpacked version first. 
+          * 
+          * @see convert()
+          */
+         inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+            _persistentRecords._myNorm = (myNorm);
+         }
+         
+         
+         
+         inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+            assertion(elementIndex>=0);
+            assertion(elementIndex<DIMENSIONS);
+            return _persistentRecords._myNorm[elementIndex];
+            
+         }
+         
+         
+         
+         inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+            assertion(elementIndex>=0);
+            assertion(elementIndex<DIMENSIONS);
+            _persistentRecords._myNorm[elementIndex]= myNorm;
             
          }
          
@@ -999,7 +1146,7 @@ namespace particles {
        *
        * 		   build date: 09-02-2014 14:40
        *
-       * @date   28/04/2014 17:39
+       * @date   03/10/2014 14:47
        */
       class particles::pit::records::CellPacked { 
          
@@ -1011,6 +1158,7 @@ namespace particles {
                int _cellIndex;
                tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+               tarch::la::Vector<DIMENSIONS,double> _myNorm;
                tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                int _numberOfLoadsFromInputStream;
                int _numberOfStoresToOutputStream;
@@ -1031,7 +1179,7 @@ namespace particles {
                /**
                 * Generated
                 */
-               PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+               PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                
                
                inline int getCellIndex() const 
@@ -1166,6 +1314,64 @@ namespace particles {
  #endif 
  {
                   _meanCoordinate = (meanCoordinate);
+               }
+               
+               
+               
+               /**
+                * Generated and optimized
+                * 
+                * If you realise a for loop using exclusively arrays (vectors) and compile 
+                * with -DUseManualAlignment you may add 
+                * \code
+                #pragma vector aligned
+                #pragma simd
+                \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                * 
+                * The alignment is tied to the unpacked records, i.e. for packed class
+                * variants the machine's natural alignment is switched off to recude the  
+                * memory footprint. Do not use any SSE/AVX operations or 
+                * vectorisation on the result for the packed variants, as the data is misaligned. 
+                * If you rely on vectorisation, convert the underlying record 
+                * into the unpacked version first. 
+                * 
+                * @see convert()
+                */
+               inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                  return _myNorm;
+               }
+               
+               
+               
+               /**
+                * Generated and optimized
+                * 
+                * If you realise a for loop using exclusively arrays (vectors) and compile 
+                * with -DUseManualAlignment you may add 
+                * \code
+                #pragma vector aligned
+                #pragma simd
+                \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                * 
+                * The alignment is tied to the unpacked records, i.e. for packed class
+                * variants the machine's natural alignment is switched off to recude the  
+                * memory footprint. Do not use any SSE/AVX operations or 
+                * vectorisation on the result for the packed variants, as the data is misaligned. 
+                * If you rely on vectorisation, convert the underlying record 
+                * into the unpacked version first. 
+                * 
+                * @see convert()
+                */
+               inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                  _myNorm = (myNorm);
                }
                
                
@@ -1406,12 +1612,12 @@ namespace particles {
             /**
              * Generated
              */
-            CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+            CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
             
             /**
              * Generated
              */
-            CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+            CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
             
             /**
              * Generated
@@ -1622,6 +1828,90 @@ namespace particles {
                assertion(elementIndex>=0);
                assertion(elementIndex<DIMENSIONS);
                _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+               
+            }
+            
+            
+            
+            /**
+             * Generated and optimized
+             * 
+             * If you realise a for loop using exclusively arrays (vectors) and compile 
+             * with -DUseManualAlignment you may add 
+             * \code
+             #pragma vector aligned
+             #pragma simd
+             \endcode to this for loop to enforce your compiler to use SSE/AVX.
+             * 
+             * The alignment is tied to the unpacked records, i.e. for packed class
+             * variants the machine's natural alignment is switched off to recude the  
+             * memory footprint. Do not use any SSE/AVX operations or 
+             * vectorisation on the result for the packed variants, as the data is misaligned. 
+             * If you rely on vectorisation, convert the underlying record 
+             * into the unpacked version first. 
+             * 
+             * @see convert()
+             */
+            inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+               return _persistentRecords._myNorm;
+            }
+            
+            
+            
+            /**
+             * Generated and optimized
+             * 
+             * If you realise a for loop using exclusively arrays (vectors) and compile 
+             * with -DUseManualAlignment you may add 
+             * \code
+             #pragma vector aligned
+             #pragma simd
+             \endcode to this for loop to enforce your compiler to use SSE/AVX.
+             * 
+             * The alignment is tied to the unpacked records, i.e. for packed class
+             * variants the machine's natural alignment is switched off to recude the  
+             * memory footprint. Do not use any SSE/AVX operations or 
+             * vectorisation on the result for the packed variants, as the data is misaligned. 
+             * If you rely on vectorisation, convert the underlying record 
+             * into the unpacked version first. 
+             * 
+             * @see convert()
+             */
+            inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+               _persistentRecords._myNorm = (myNorm);
+            }
+            
+            
+            
+            inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+               assertion(elementIndex>=0);
+               assertion(elementIndex<DIMENSIONS);
+               return _persistentRecords._myNorm[elementIndex];
+               
+            }
+            
+            
+            
+            inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+               assertion(elementIndex>=0);
+               assertion(elementIndex<DIMENSIONS);
+               _persistentRecords._myNorm[elementIndex]= myNorm;
                
             }
             
@@ -1992,7 +2282,7 @@ namespace particles {
           *
           * 		   build date: 09-02-2014 14:40
           *
-          * @date   28/04/2014 17:39
+          * @date   03/10/2014 14:47
           */
          class particles::pit::records::Cell { 
             
@@ -2016,6 +2306,11 @@ namespace particles {
                   #else
                   tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
                   #endif
+                  #ifdef UseManualAlignment
+                  tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                  #else
+                  tarch::la::Vector<DIMENSIONS,double> _myNorm;
+                  #endif
                   bool _isInside;
                   State _state;
                   int _level;
@@ -2037,7 +2332,7 @@ namespace particles {
                   /**
                    * Generated
                    */
-                  PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                  PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                   
                   
                   inline int getCellIndex() const 
@@ -2172,6 +2467,64 @@ namespace particles {
  #endif 
  {
                      _meanCoordinate = (meanCoordinate);
+                  }
+                  
+                  
+                  
+                  /**
+                   * Generated and optimized
+                   * 
+                   * If you realise a for loop using exclusively arrays (vectors) and compile 
+                   * with -DUseManualAlignment you may add 
+                   * \code
+                   #pragma vector aligned
+                   #pragma simd
+                   \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                   * 
+                   * The alignment is tied to the unpacked records, i.e. for packed class
+                   * variants the machine's natural alignment is switched off to recude the  
+                   * memory footprint. Do not use any SSE/AVX operations or 
+                   * vectorisation on the result for the packed variants, as the data is misaligned. 
+                   * If you rely on vectorisation, convert the underlying record 
+                   * into the unpacked version first. 
+                   * 
+                   * @see convert()
+                   */
+                  inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     return _myNorm;
+                  }
+                  
+                  
+                  
+                  /**
+                   * Generated and optimized
+                   * 
+                   * If you realise a for loop using exclusively arrays (vectors) and compile 
+                   * with -DUseManualAlignment you may add 
+                   * \code
+                   #pragma vector aligned
+                   #pragma simd
+                   \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                   * 
+                   * The alignment is tied to the unpacked records, i.e. for packed class
+                   * variants the machine's natural alignment is switched off to recude the  
+                   * memory footprint. Do not use any SSE/AVX operations or 
+                   * vectorisation on the result for the packed variants, as the data is misaligned. 
+                   * If you rely on vectorisation, convert the underlying record 
+                   * into the unpacked version first. 
+                   * 
+                   * @see convert()
+                   */
+                  inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     _myNorm = (myNorm);
                   }
                   
                   
@@ -2372,12 +2725,12 @@ namespace particles {
                /**
                 * Generated
                 */
-               Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+               Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                
                /**
                 * Generated
                 */
-               Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+               Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                
                /**
                 * Generated
@@ -2588,6 +2941,90 @@ namespace particles {
                   assertion(elementIndex>=0);
                   assertion(elementIndex<DIMENSIONS);
                   _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                  
+               }
+               
+               
+               
+               /**
+                * Generated and optimized
+                * 
+                * If you realise a for loop using exclusively arrays (vectors) and compile 
+                * with -DUseManualAlignment you may add 
+                * \code
+                #pragma vector aligned
+                #pragma simd
+                \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                * 
+                * The alignment is tied to the unpacked records, i.e. for packed class
+                * variants the machine's natural alignment is switched off to recude the  
+                * memory footprint. Do not use any SSE/AVX operations or 
+                * vectorisation on the result for the packed variants, as the data is misaligned. 
+                * If you rely on vectorisation, convert the underlying record 
+                * into the unpacked version first. 
+                * 
+                * @see convert()
+                */
+               inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                  return _persistentRecords._myNorm;
+               }
+               
+               
+               
+               /**
+                * Generated and optimized
+                * 
+                * If you realise a for loop using exclusively arrays (vectors) and compile 
+                * with -DUseManualAlignment you may add 
+                * \code
+                #pragma vector aligned
+                #pragma simd
+                \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                * 
+                * The alignment is tied to the unpacked records, i.e. for packed class
+                * variants the machine's natural alignment is switched off to recude the  
+                * memory footprint. Do not use any SSE/AVX operations or 
+                * vectorisation on the result for the packed variants, as the data is misaligned. 
+                * If you rely on vectorisation, convert the underlying record 
+                * into the unpacked version first. 
+                * 
+                * @see convert()
+                */
+               inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                  _persistentRecords._myNorm = (myNorm);
+               }
+               
+               
+               
+               inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                  assertion(elementIndex>=0);
+                  assertion(elementIndex<DIMENSIONS);
+                  return _persistentRecords._myNorm[elementIndex];
+                  
+               }
+               
+               
+               
+               inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                  assertion(elementIndex>=0);
+                  assertion(elementIndex<DIMENSIONS);
+                  _persistentRecords._myNorm[elementIndex]= myNorm;
                   
                }
                
@@ -2914,7 +3351,7 @@ namespace particles {
              *
              * 		   build date: 09-02-2014 14:40
              *
-             * @date   28/04/2014 17:39
+             * @date   03/10/2014 14:47
              */
             class particles::pit::records::CellPacked { 
                
@@ -2926,6 +3363,7 @@ namespace particles {
                      int _cellIndex;
                      tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                      tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                     tarch::la::Vector<DIMENSIONS,double> _myNorm;
                      int _level;
                      tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                      
@@ -2945,7 +3383,7 @@ namespace particles {
                      /**
                       * Generated
                       */
-                     PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                     PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                      
                      
                      inline int getCellIndex() const 
@@ -3080,6 +3518,64 @@ namespace particles {
  #endif 
  {
                         _meanCoordinate = (meanCoordinate);
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        return _myNorm;
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        _myNorm = (myNorm);
                      }
                      
                      
@@ -3300,12 +3796,12 @@ namespace particles {
                   /**
                    * Generated
                    */
-                  CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                  CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                   
                   /**
                    * Generated
                    */
-                  CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                  CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                   
                   /**
                    * Generated
@@ -3516,6 +4012,90 @@ namespace particles {
                      assertion(elementIndex>=0);
                      assertion(elementIndex<DIMENSIONS);
                      _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                     
+                  }
+                  
+                  
+                  
+                  /**
+                   * Generated and optimized
+                   * 
+                   * If you realise a for loop using exclusively arrays (vectors) and compile 
+                   * with -DUseManualAlignment you may add 
+                   * \code
+                   #pragma vector aligned
+                   #pragma simd
+                   \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                   * 
+                   * The alignment is tied to the unpacked records, i.e. for packed class
+                   * variants the machine's natural alignment is switched off to recude the  
+                   * memory footprint. Do not use any SSE/AVX operations or 
+                   * vectorisation on the result for the packed variants, as the data is misaligned. 
+                   * If you rely on vectorisation, convert the underlying record 
+                   * into the unpacked version first. 
+                   * 
+                   * @see convert()
+                   */
+                  inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     return _persistentRecords._myNorm;
+                  }
+                  
+                  
+                  
+                  /**
+                   * Generated and optimized
+                   * 
+                   * If you realise a for loop using exclusively arrays (vectors) and compile 
+                   * with -DUseManualAlignment you may add 
+                   * \code
+                   #pragma vector aligned
+                   #pragma simd
+                   \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                   * 
+                   * The alignment is tied to the unpacked records, i.e. for packed class
+                   * variants the machine's natural alignment is switched off to recude the  
+                   * memory footprint. Do not use any SSE/AVX operations or 
+                   * vectorisation on the result for the packed variants, as the data is misaligned. 
+                   * If you rely on vectorisation, convert the underlying record 
+                   * into the unpacked version first. 
+                   * 
+                   * @see convert()
+                   */
+                  inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     _persistentRecords._myNorm = (myNorm);
+                  }
+                  
+                  
+                  
+                  inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     assertion(elementIndex>=0);
+                     assertion(elementIndex<DIMENSIONS);
+                     return _persistentRecords._myNorm[elementIndex];
+                     
+                  }
+                  
+                  
+                  
+                  inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     assertion(elementIndex>=0);
+                     assertion(elementIndex<DIMENSIONS);
+                     _persistentRecords._myNorm[elementIndex]= myNorm;
                      
                   }
                   
@@ -3867,7 +4447,7 @@ namespace particles {
              *
              * 		   build date: 09-02-2014 14:40
              *
-             * @date   28/04/2014 17:39
+             * @date   03/10/2014 14:47
              */
             class particles::pit::records::Cell { 
                
@@ -3890,6 +4470,11 @@ namespace particles {
                      tarch::la::Vector<DIMENSIONS,double> _meanCoordinate __attribute__((aligned(VectorisationAlignment)));
                      #else
                      tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                     #endif
+                     #ifdef UseManualAlignment
+                     tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                     #else
+                     tarch::la::Vector<DIMENSIONS,double> _myNorm;
                      #endif
                      bool _isInside;
                      State _state;
@@ -3919,7 +4504,7 @@ namespace particles {
                      /**
                       * Generated
                       */
-                     PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                     PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                      
                      
                      inline int getCellIndex() const 
@@ -4054,6 +4639,64 @@ namespace particles {
  #endif 
  {
                         _meanCoordinate = (meanCoordinate);
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        return _myNorm;
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        _myNorm = (myNorm);
                      }
                      
                      
@@ -4394,12 +5037,12 @@ namespace particles {
                   /**
                    * Generated
                    */
-                  Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                  Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                   
                   /**
                    * Generated
                    */
-                  Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                  Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                   
                   /**
                    * Generated
@@ -4610,6 +5253,90 @@ namespace particles {
                      assertion(elementIndex>=0);
                      assertion(elementIndex<DIMENSIONS);
                      _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                     
+                  }
+                  
+                  
+                  
+                  /**
+                   * Generated and optimized
+                   * 
+                   * If you realise a for loop using exclusively arrays (vectors) and compile 
+                   * with -DUseManualAlignment you may add 
+                   * \code
+                   #pragma vector aligned
+                   #pragma simd
+                   \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                   * 
+                   * The alignment is tied to the unpacked records, i.e. for packed class
+                   * variants the machine's natural alignment is switched off to recude the  
+                   * memory footprint. Do not use any SSE/AVX operations or 
+                   * vectorisation on the result for the packed variants, as the data is misaligned. 
+                   * If you rely on vectorisation, convert the underlying record 
+                   * into the unpacked version first. 
+                   * 
+                   * @see convert()
+                   */
+                  inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     return _persistentRecords._myNorm;
+                  }
+                  
+                  
+                  
+                  /**
+                   * Generated and optimized
+                   * 
+                   * If you realise a for loop using exclusively arrays (vectors) and compile 
+                   * with -DUseManualAlignment you may add 
+                   * \code
+                   #pragma vector aligned
+                   #pragma simd
+                   \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                   * 
+                   * The alignment is tied to the unpacked records, i.e. for packed class
+                   * variants the machine's natural alignment is switched off to recude the  
+                   * memory footprint. Do not use any SSE/AVX operations or 
+                   * vectorisation on the result for the packed variants, as the data is misaligned. 
+                   * If you rely on vectorisation, convert the underlying record 
+                   * into the unpacked version first. 
+                   * 
+                   * @see convert()
+                   */
+                  inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     _persistentRecords._myNorm = (myNorm);
+                  }
+                  
+                  
+                  
+                  inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     assertion(elementIndex>=0);
+                     assertion(elementIndex<DIMENSIONS);
+                     return _persistentRecords._myNorm[elementIndex];
+                     
+                  }
+                  
+                  
+                  
+                  inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                     assertion(elementIndex>=0);
+                     assertion(elementIndex<DIMENSIONS);
+                     _persistentRecords._myNorm[elementIndex]= myNorm;
                      
                   }
                   
@@ -5076,7 +5803,7 @@ namespace particles {
                 *
                 * 		   build date: 09-02-2014 14:40
                 *
-                * @date   28/04/2014 17:39
+                * @date   03/10/2014 14:47
                 */
                class particles::pit::records::CellPacked { 
                   
@@ -5088,6 +5815,7 @@ namespace particles {
                         int _cellIndex;
                         tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                         tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                        tarch::la::Vector<DIMENSIONS,double> _myNorm;
                         tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                         int _responsibleRank;
                         bool _subtreeHoldsWorker;
@@ -5114,7 +5842,7 @@ namespace particles {
                         /**
                          * Generated
                          */
-                        PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                        PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                         
                         
                         inline int getCellIndex() const 
@@ -5249,6 +5977,64 @@ namespace particles {
  #endif 
  {
                            _meanCoordinate = (meanCoordinate);
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           return _myNorm;
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           _myNorm = (myNorm);
                         }
                         
                         
@@ -5612,12 +6398,12 @@ namespace particles {
                      /**
                       * Generated
                       */
-                     CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                     CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                      
                      /**
                       * Generated
                       */
-                     CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                     CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                      
                      /**
                       * Generated
@@ -5828,6 +6614,90 @@ namespace particles {
                         assertion(elementIndex>=0);
                         assertion(elementIndex<DIMENSIONS);
                         _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                        
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        return _persistentRecords._myNorm;
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        _persistentRecords._myNorm = (myNorm);
+                     }
+                     
+                     
+                     
+                     inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        assertion(elementIndex>=0);
+                        assertion(elementIndex<DIMENSIONS);
+                        return _persistentRecords._myNorm[elementIndex];
+                        
+                     }
+                     
+                     
+                     
+                     inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        assertion(elementIndex>=0);
+                        assertion(elementIndex<DIMENSIONS);
+                        _persistentRecords._myNorm[elementIndex]= myNorm;
                         
                      }
                      
@@ -6322,7 +7192,7 @@ namespace particles {
                 *
                 * 		   build date: 09-02-2014 14:40
                 *
-                * @date   28/04/2014 17:39
+                * @date   03/10/2014 14:47
                 */
                class particles::pit::records::Cell { 
                   
@@ -6346,6 +7216,11 @@ namespace particles {
                         #else
                         tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
                         #endif
+                        #ifdef UseManualAlignment
+                        tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                        #else
+                        tarch::la::Vector<DIMENSIONS,double> _myNorm;
+                        #endif
                         bool _isInside;
                         State _state;
                         #ifdef UseManualAlignment
@@ -6366,7 +7241,7 @@ namespace particles {
                         /**
                          * Generated
                          */
-                        PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                        PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                         
                         
                         inline int getCellIndex() const 
@@ -6501,6 +7376,64 @@ namespace particles {
  #endif 
  {
                            _meanCoordinate = (meanCoordinate);
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           return _myNorm;
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           _myNorm = (myNorm);
                         }
                         
                         
@@ -6681,12 +7614,12 @@ namespace particles {
                      /**
                       * Generated
                       */
-                     Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                     Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                      
                      /**
                       * Generated
                       */
-                     Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                     Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                      
                      /**
                       * Generated
@@ -6897,6 +7830,90 @@ namespace particles {
                         assertion(elementIndex>=0);
                         assertion(elementIndex<DIMENSIONS);
                         _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                        
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        return _persistentRecords._myNorm;
+                     }
+                     
+                     
+                     
+                     /**
+                      * Generated and optimized
+                      * 
+                      * If you realise a for loop using exclusively arrays (vectors) and compile 
+                      * with -DUseManualAlignment you may add 
+                      * \code
+                      #pragma vector aligned
+                      #pragma simd
+                      \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                      * 
+                      * The alignment is tied to the unpacked records, i.e. for packed class
+                      * variants the machine's natural alignment is switched off to recude the  
+                      * memory footprint. Do not use any SSE/AVX operations or 
+                      * vectorisation on the result for the packed variants, as the data is misaligned. 
+                      * If you rely on vectorisation, convert the underlying record 
+                      * into the unpacked version first. 
+                      * 
+                      * @see convert()
+                      */
+                     inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        _persistentRecords._myNorm = (myNorm);
+                     }
+                     
+                     
+                     
+                     inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        assertion(elementIndex>=0);
+                        assertion(elementIndex<DIMENSIONS);
+                        return _persistentRecords._myNorm[elementIndex];
+                        
+                     }
+                     
+                     
+                     
+                     inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                        assertion(elementIndex>=0);
+                        assertion(elementIndex<DIMENSIONS);
+                        _persistentRecords._myNorm[elementIndex]= myNorm;
                         
                      }
                      
@@ -7203,7 +8220,7 @@ namespace particles {
                    *
                    * 		   build date: 09-02-2014 14:40
                    *
-                   * @date   28/04/2014 17:39
+                   * @date   03/10/2014 14:47
                    */
                   class particles::pit::records::CellPacked { 
                      
@@ -7215,6 +8232,7 @@ namespace particles {
                            int _cellIndex;
                            tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                            tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                           tarch::la::Vector<DIMENSIONS,double> _myNorm;
                            tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                            
                            /** mapping of records:
@@ -7233,7 +8251,7 @@ namespace particles {
                            /**
                             * Generated
                             */
-                           PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                           PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                            
                            
                            inline int getCellIndex() const 
@@ -7368,6 +8386,64 @@ namespace particles {
  #endif 
  {
                               _meanCoordinate = (meanCoordinate);
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              return _myNorm;
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              _myNorm = (myNorm);
                            }
                            
                            
@@ -7568,12 +8644,12 @@ namespace particles {
                         /**
                          * Generated
                          */
-                        CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                        CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                         
                         /**
                          * Generated
                          */
-                        CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
+                        CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber);
                         
                         /**
                          * Generated
@@ -7784,6 +8860,90 @@ namespace particles {
                            assertion(elementIndex>=0);
                            assertion(elementIndex<DIMENSIONS);
                            _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                           
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           return _persistentRecords._myNorm;
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           _persistentRecords._myNorm = (myNorm);
+                        }
+                        
+                        
+                        
+                        inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           assertion(elementIndex>=0);
+                           assertion(elementIndex<DIMENSIONS);
+                           return _persistentRecords._myNorm[elementIndex];
+                           
+                        }
+                        
+                        
+                        
+                        inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           assertion(elementIndex>=0);
+                           assertion(elementIndex<DIMENSIONS);
+                           _persistentRecords._myNorm[elementIndex]= myNorm;
                            
                         }
                         
@@ -8115,7 +9275,7 @@ namespace particles {
                    *
                    * 		   build date: 09-02-2014 14:40
                    *
-                   * @date   28/04/2014 17:39
+                   * @date   03/10/2014 14:47
                    */
                   class particles::pit::records::Cell { 
                      
@@ -8138,6 +9298,11 @@ namespace particles {
                            tarch::la::Vector<DIMENSIONS,double> _meanCoordinate __attribute__((aligned(VectorisationAlignment)));
                            #else
                            tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                           #endif
+                           #ifdef UseManualAlignment
+                           tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                           #else
+                           tarch::la::Vector<DIMENSIONS,double> _myNorm;
                            #endif
                            bool _isInside;
                            State _state;
@@ -8170,7 +9335,7 @@ namespace particles {
                            /**
                             * Generated
                             */
-                           PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                           PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                            
                            
                            inline int getCellIndex() const 
@@ -8305,6 +9470,64 @@ namespace particles {
  #endif 
  {
                               _meanCoordinate = (meanCoordinate);
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              return _myNorm;
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              _myNorm = (myNorm);
                            }
                            
                            
@@ -8705,12 +9928,12 @@ namespace particles {
                         /**
                          * Generated
                          */
-                        Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                        Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                         
                         /**
                          * Generated
                          */
-                        Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                        Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                         
                         /**
                          * Generated
@@ -8921,6 +10144,90 @@ namespace particles {
                            assertion(elementIndex>=0);
                            assertion(elementIndex<DIMENSIONS);
                            _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                           
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           return _persistentRecords._myNorm;
+                        }
+                        
+                        
+                        
+                        /**
+                         * Generated and optimized
+                         * 
+                         * If you realise a for loop using exclusively arrays (vectors) and compile 
+                         * with -DUseManualAlignment you may add 
+                         * \code
+                         #pragma vector aligned
+                         #pragma simd
+                         \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                         * 
+                         * The alignment is tied to the unpacked records, i.e. for packed class
+                         * variants the machine's natural alignment is switched off to recude the  
+                         * memory footprint. Do not use any SSE/AVX operations or 
+                         * vectorisation on the result for the packed variants, as the data is misaligned. 
+                         * If you rely on vectorisation, convert the underlying record 
+                         * into the unpacked version first. 
+                         * 
+                         * @see convert()
+                         */
+                        inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           _persistentRecords._myNorm = (myNorm);
+                        }
+                        
+                        
+                        
+                        inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           assertion(elementIndex>=0);
+                           assertion(elementIndex<DIMENSIONS);
+                           return _persistentRecords._myNorm[elementIndex];
+                           
+                        }
+                        
+                        
+                        
+                        inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                           assertion(elementIndex>=0);
+                           assertion(elementIndex<DIMENSIONS);
+                           _persistentRecords._myNorm[elementIndex]= myNorm;
                            
                         }
                         
@@ -9447,7 +10754,7 @@ namespace particles {
                       *
                       * 		   build date: 09-02-2014 14:40
                       *
-                      * @date   28/04/2014 17:39
+                      * @date   03/10/2014 14:47
                       */
                      class particles::pit::records::CellPacked { 
                         
@@ -9459,6 +10766,7 @@ namespace particles {
                               int _cellIndex;
                               tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                               tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                              tarch::la::Vector<DIMENSIONS,double> _myNorm;
                               int _level;
                               tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                               int _responsibleRank;
@@ -9488,7 +10796,7 @@ namespace particles {
                               /**
                                * Generated
                                */
-                              PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                              PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                               
                               
                               inline int getCellIndex() const 
@@ -9623,6 +10931,64 @@ namespace particles {
  #endif 
  {
                                  _meanCoordinate = (meanCoordinate);
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 return _myNorm;
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 _myNorm = (myNorm);
                               }
                               
                               
@@ -10046,12 +11412,12 @@ namespace particles {
                            /**
                             * Generated
                             */
-                           CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                           CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                            
                            /**
                             * Generated
                             */
-                           CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                           CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                            
                            /**
                             * Generated
@@ -10262,6 +11628,90 @@ namespace particles {
                               assertion(elementIndex>=0);
                               assertion(elementIndex<DIMENSIONS);
                               _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                              
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              return _persistentRecords._myNorm;
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              _persistentRecords._myNorm = (myNorm);
+                           }
+                           
+                           
+                           
+                           inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              assertion(elementIndex>=0);
+                              assertion(elementIndex<DIMENSIONS);
+                              return _persistentRecords._myNorm[elementIndex];
+                              
+                           }
+                           
+                           
+                           
+                           inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              assertion(elementIndex>=0);
+                              assertion(elementIndex<DIMENSIONS);
+                              _persistentRecords._myNorm[elementIndex]= myNorm;
                               
                            }
                            
@@ -10816,7 +12266,7 @@ namespace particles {
                       *
                       * 		   build date: 09-02-2014 14:40
                       *
-                      * @date   28/04/2014 17:39
+                      * @date   03/10/2014 14:47
                       */
                      class particles::pit::records::Cell { 
                         
@@ -10839,6 +12289,11 @@ namespace particles {
                               tarch::la::Vector<DIMENSIONS,double> _meanCoordinate __attribute__((aligned(VectorisationAlignment)));
                               #else
                               tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                              #endif
+                              #ifdef UseManualAlignment
+                              tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                              #else
+                              tarch::la::Vector<DIMENSIONS,double> _myNorm;
                               #endif
                               bool _isInside;
                               State _state;
@@ -10869,7 +12324,7 @@ namespace particles {
                               /**
                                * Generated
                                */
-                              PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                              PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                               
                               
                               inline int getCellIndex() const 
@@ -11004,6 +12459,64 @@ namespace particles {
  #endif 
  {
                                  _meanCoordinate = (meanCoordinate);
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 return _myNorm;
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 _myNorm = (myNorm);
                               }
                               
                               
@@ -11364,12 +12877,12 @@ namespace particles {
                            /**
                             * Generated
                             */
-                           Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                           Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                            
                            /**
                             * Generated
                             */
-                           Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                           Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                            
                            /**
                             * Generated
@@ -11580,6 +13093,90 @@ namespace particles {
                               assertion(elementIndex>=0);
                               assertion(elementIndex<DIMENSIONS);
                               _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                              
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              return _persistentRecords._myNorm;
+                           }
+                           
+                           
+                           
+                           /**
+                            * Generated and optimized
+                            * 
+                            * If you realise a for loop using exclusively arrays (vectors) and compile 
+                            * with -DUseManualAlignment you may add 
+                            * \code
+                            #pragma vector aligned
+                            #pragma simd
+                            \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                            * 
+                            * The alignment is tied to the unpacked records, i.e. for packed class
+                            * variants the machine's natural alignment is switched off to recude the  
+                            * memory footprint. Do not use any SSE/AVX operations or 
+                            * vectorisation on the result for the packed variants, as the data is misaligned. 
+                            * If you rely on vectorisation, convert the underlying record 
+                            * into the unpacked version first. 
+                            * 
+                            * @see convert()
+                            */
+                           inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              _persistentRecords._myNorm = (myNorm);
+                           }
+                           
+                           
+                           
+                           inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              assertion(elementIndex>=0);
+                              assertion(elementIndex<DIMENSIONS);
+                              return _persistentRecords._myNorm[elementIndex];
+                              
+                           }
+                           
+                           
+                           
+                           inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                              assertion(elementIndex>=0);
+                              assertion(elementIndex<DIMENSIONS);
+                              _persistentRecords._myNorm[elementIndex]= myNorm;
                               
                            }
                            
@@ -12066,7 +13663,7 @@ namespace particles {
                          *
                          * 		   build date: 09-02-2014 14:40
                          *
-                         * @date   28/04/2014 17:39
+                         * @date   03/10/2014 14:47
                          */
                         class particles::pit::records::CellPacked { 
                            
@@ -12078,6 +13675,7 @@ namespace particles {
                                  int _cellIndex;
                                  tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                                  tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                                 tarch::la::Vector<DIMENSIONS,double> _myNorm;
                                  int _level;
                                  tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                                  int _responsibleRank;
@@ -12105,7 +13703,7 @@ namespace particles {
                                  /**
                                   * Generated
                                   */
-                                 PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                                 PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                                  
                                  
                                  inline int getCellIndex() const 
@@ -12240,6 +13838,64 @@ namespace particles {
  #endif 
  {
                                     _meanCoordinate = (meanCoordinate);
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    return _myNorm;
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    _myNorm = (myNorm);
                                  }
                                  
                                  
@@ -12623,12 +14279,12 @@ namespace particles {
                               /**
                                * Generated
                                */
-                              CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                              CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                               
                               /**
                                * Generated
                                */
-                              CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
+                              CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate);
                               
                               /**
                                * Generated
@@ -12839,6 +14495,90 @@ namespace particles {
                                  assertion(elementIndex>=0);
                                  assertion(elementIndex<DIMENSIONS);
                                  _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                                 
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 return _persistentRecords._myNorm;
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 _persistentRecords._myNorm = (myNorm);
+                              }
+                              
+                              
+                              
+                              inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 assertion(elementIndex>=0);
+                                 assertion(elementIndex<DIMENSIONS);
+                                 return _persistentRecords._myNorm[elementIndex];
+                                 
+                              }
+                              
+                              
+                              
+                              inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 assertion(elementIndex>=0);
+                                 assertion(elementIndex<DIMENSIONS);
+                                 _persistentRecords._myNorm[elementIndex]= myNorm;
                                  
                               }
                               
@@ -13353,7 +15093,7 @@ namespace particles {
                          *
                          * 		   build date: 09-02-2014 14:40
                          *
-                         * @date   28/04/2014 17:39
+                         * @date   03/10/2014 14:47
                          */
                         class particles::pit::records::Cell { 
                            
@@ -13376,6 +15116,11 @@ namespace particles {
                                  tarch::la::Vector<DIMENSIONS,double> _meanCoordinate __attribute__((aligned(VectorisationAlignment)));
                                  #else
                                  tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                                 #endif
+                                 #ifdef UseManualAlignment
+                                 tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                                 #else
+                                 tarch::la::Vector<DIMENSIONS,double> _myNorm;
                                  #endif
                                  bool _isInside;
                                  State _state;
@@ -13407,7 +15152,7 @@ namespace particles {
                                  /**
                                   * Generated
                                   */
-                                 PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                 PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                  
                                  
                                  inline int getCellIndex() const 
@@ -13542,6 +15287,64 @@ namespace particles {
  #endif 
  {
                                     _meanCoordinate = (meanCoordinate);
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    return _myNorm;
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    _myNorm = (myNorm);
                                  }
                                  
                                  
@@ -13922,12 +15725,12 @@ namespace particles {
                               /**
                                * Generated
                                */
-                              Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                              Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                               
                               /**
                                * Generated
                                */
-                              Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                              Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                               
                               /**
                                * Generated
@@ -14138,6 +15941,90 @@ namespace particles {
                                  assertion(elementIndex>=0);
                                  assertion(elementIndex<DIMENSIONS);
                                  _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                                 
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 return _persistentRecords._myNorm;
+                              }
+                              
+                              
+                              
+                              /**
+                               * Generated and optimized
+                               * 
+                               * If you realise a for loop using exclusively arrays (vectors) and compile 
+                               * with -DUseManualAlignment you may add 
+                               * \code
+                               #pragma vector aligned
+                               #pragma simd
+                               \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                               * 
+                               * The alignment is tied to the unpacked records, i.e. for packed class
+                               * variants the machine's natural alignment is switched off to recude the  
+                               * memory footprint. Do not use any SSE/AVX operations or 
+                               * vectorisation on the result for the packed variants, as the data is misaligned. 
+                               * If you rely on vectorisation, convert the underlying record 
+                               * into the unpacked version first. 
+                               * 
+                               * @see convert()
+                               */
+                              inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 _persistentRecords._myNorm = (myNorm);
+                              }
+                              
+                              
+                              
+                              inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 assertion(elementIndex>=0);
+                                 assertion(elementIndex<DIMENSIONS);
+                                 return _persistentRecords._myNorm[elementIndex];
+                                 
+                              }
+                              
+                              
+                              
+                              inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                 assertion(elementIndex>=0);
+                                 assertion(elementIndex<DIMENSIONS);
+                                 _persistentRecords._myNorm[elementIndex]= myNorm;
                                  
                               }
                               
@@ -14644,7 +16531,7 @@ namespace particles {
                             *
                             * 		   build date: 09-02-2014 14:40
                             *
-                            * @date   28/04/2014 17:39
+                            * @date   03/10/2014 14:47
                             */
                            class particles::pit::records::CellPacked { 
                               
@@ -14656,6 +16543,7 @@ namespace particles {
                                     int _cellIndex;
                                     tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                                     tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                                    tarch::la::Vector<DIMENSIONS,double> _myNorm;
                                     tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                                     int _responsibleRank;
                                     bool _subtreeHoldsWorker;
@@ -14684,7 +16572,7 @@ namespace particles {
                                     /**
                                      * Generated
                                      */
-                                    PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                    PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                     
                                     
                                     inline int getCellIndex() const 
@@ -14819,6 +16707,64 @@ namespace particles {
  #endif 
  {
                                        _meanCoordinate = (meanCoordinate);
+                                    }
+                                    
+                                    
+                                    
+                                    /**
+                                     * Generated and optimized
+                                     * 
+                                     * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                     * with -DUseManualAlignment you may add 
+                                     * \code
+                                     #pragma vector aligned
+                                     #pragma simd
+                                     \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                     * 
+                                     * The alignment is tied to the unpacked records, i.e. for packed class
+                                     * variants the machine's natural alignment is switched off to recude the  
+                                     * memory footprint. Do not use any SSE/AVX operations or 
+                                     * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                     * If you rely on vectorisation, convert the underlying record 
+                                     * into the unpacked version first. 
+                                     * 
+                                     * @see convert()
+                                     */
+                                    inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       return _myNorm;
+                                    }
+                                    
+                                    
+                                    
+                                    /**
+                                     * Generated and optimized
+                                     * 
+                                     * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                     * with -DUseManualAlignment you may add 
+                                     * \code
+                                     #pragma vector aligned
+                                     #pragma simd
+                                     \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                     * 
+                                     * The alignment is tied to the unpacked records, i.e. for packed class
+                                     * variants the machine's natural alignment is switched off to recude the  
+                                     * memory footprint. Do not use any SSE/AVX operations or 
+                                     * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                     * If you rely on vectorisation, convert the underlying record 
+                                     * into the unpacked version first. 
+                                     * 
+                                     * @see convert()
+                                     */
+                                    inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       _myNorm = (myNorm);
                                     }
                                     
                                     
@@ -15222,12 +17168,12 @@ namespace particles {
                                  /**
                                   * Generated
                                   */
-                                 CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                 CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                  
                                  /**
                                   * Generated
                                   */
-                                 CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                 CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& responsibleRank, const bool& subtreeHoldsWorker, const double& nodeWorkload, const double& localWorkload, const double& totalWorkload, const double& maxWorkload, const double& minWorkload, const bool& cellIsAForkCandidate, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                  
                                  /**
                                   * Generated
@@ -15438,6 +17384,90 @@ namespace particles {
                                     assertion(elementIndex>=0);
                                     assertion(elementIndex<DIMENSIONS);
                                     _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                                    
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    return _persistentRecords._myNorm;
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    _persistentRecords._myNorm = (myNorm);
+                                 }
+                                 
+                                 
+                                 
+                                 inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    assertion(elementIndex>=0);
+                                    assertion(elementIndex<DIMENSIONS);
+                                    return _persistentRecords._myNorm[elementIndex];
+                                    
+                                 }
+                                 
+                                 
+                                 
+                                 inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    assertion(elementIndex>=0);
+                                    assertion(elementIndex<DIMENSIONS);
+                                    _persistentRecords._myNorm[elementIndex]= myNorm;
                                     
                                  }
                                  
@@ -15972,7 +18002,7 @@ namespace particles {
                             *
                             * 		   build date: 09-02-2014 14:40
                             *
-                            * @date   28/04/2014 17:39
+                            * @date   03/10/2014 14:47
                             */
                            class particles::pit::records::Cell { 
                               
@@ -15995,6 +18025,11 @@ namespace particles {
                                     tarch::la::Vector<DIMENSIONS,double> _meanCoordinate __attribute__((aligned(VectorisationAlignment)));
                                     #else
                                     tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                                    #endif
+                                    #ifdef UseManualAlignment
+                                    tarch::la::Vector<DIMENSIONS,double> _myNorm __attribute__((aligned(VectorisationAlignment)));
+                                    #else
+                                    tarch::la::Vector<DIMENSIONS,double> _myNorm;
                                     #endif
                                     bool _isInside;
                                     State _state;
@@ -16019,7 +18054,7 @@ namespace particles {
                                     /**
                                      * Generated
                                      */
-                                    PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                    PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                     
                                     
                                     inline int getCellIndex() const 
@@ -16154,6 +18189,64 @@ namespace particles {
  #endif 
  {
                                        _meanCoordinate = (meanCoordinate);
+                                    }
+                                    
+                                    
+                                    
+                                    /**
+                                     * Generated and optimized
+                                     * 
+                                     * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                     * with -DUseManualAlignment you may add 
+                                     * \code
+                                     #pragma vector aligned
+                                     #pragma simd
+                                     \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                     * 
+                                     * The alignment is tied to the unpacked records, i.e. for packed class
+                                     * variants the machine's natural alignment is switched off to recude the  
+                                     * memory footprint. Do not use any SSE/AVX operations or 
+                                     * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                     * If you rely on vectorisation, convert the underlying record 
+                                     * into the unpacked version first. 
+                                     * 
+                                     * @see convert()
+                                     */
+                                    inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       return _myNorm;
+                                    }
+                                    
+                                    
+                                    
+                                    /**
+                                     * Generated and optimized
+                                     * 
+                                     * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                     * with -DUseManualAlignment you may add 
+                                     * \code
+                                     #pragma vector aligned
+                                     #pragma simd
+                                     \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                     * 
+                                     * The alignment is tied to the unpacked records, i.e. for packed class
+                                     * variants the machine's natural alignment is switched off to recude the  
+                                     * memory footprint. Do not use any SSE/AVX operations or 
+                                     * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                     * If you rely on vectorisation, convert the underlying record 
+                                     * into the unpacked version first. 
+                                     * 
+                                     * @see convert()
+                                     */
+                                    inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       _myNorm = (myNorm);
                                     }
                                     
                                     
@@ -16394,12 +18487,12 @@ namespace particles {
                                  /**
                                   * Generated
                                   */
-                                 Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                 Cell(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                  
                                  /**
                                   * Generated
                                   */
-                                 Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                 Cell(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                  
                                  /**
                                   * Generated
@@ -16610,6 +18703,90 @@ namespace particles {
                                     assertion(elementIndex>=0);
                                     assertion(elementIndex<DIMENSIONS);
                                     _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                                    
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    return _persistentRecords._myNorm;
+                                 }
+                                 
+                                 
+                                 
+                                 /**
+                                  * Generated and optimized
+                                  * 
+                                  * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                  * with -DUseManualAlignment you may add 
+                                  * \code
+                                  #pragma vector aligned
+                                  #pragma simd
+                                  \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                  * 
+                                  * The alignment is tied to the unpacked records, i.e. for packed class
+                                  * variants the machine's natural alignment is switched off to recude the  
+                                  * memory footprint. Do not use any SSE/AVX operations or 
+                                  * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                  * If you rely on vectorisation, convert the underlying record 
+                                  * into the unpacked version first. 
+                                  * 
+                                  * @see convert()
+                                  */
+                                 inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    _persistentRecords._myNorm = (myNorm);
+                                 }
+                                 
+                                 
+                                 
+                                 inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    assertion(elementIndex>=0);
+                                    assertion(elementIndex<DIMENSIONS);
+                                    return _persistentRecords._myNorm[elementIndex];
+                                    
+                                 }
+                                 
+                                 
+                                 
+                                 inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                    assertion(elementIndex>=0);
+                                    assertion(elementIndex<DIMENSIONS);
+                                    _persistentRecords._myNorm[elementIndex]= myNorm;
                                     
                                  }
                                  
@@ -16976,7 +19153,7 @@ namespace particles {
                                *
                                * 		   build date: 09-02-2014 14:40
                                *
-                               * @date   28/04/2014 17:39
+                               * @date   03/10/2014 14:47
                                */
                               class particles::pit::records::CellPacked { 
                                  
@@ -16988,6 +19165,7 @@ namespace particles {
                                        int _cellIndex;
                                        tarch::la::Vector<DIMENSIONS,double> _meanVelocity;
                                        tarch::la::Vector<DIMENSIONS,double> _meanCoordinate;
+                                       tarch::la::Vector<DIMENSIONS,double> _myNorm;
                                        int _level;
                                        tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int> _accessNumber;
                                        int _numberOfLoadsFromInputStream;
@@ -17009,7 +19187,7 @@ namespace particles {
                                        /**
                                         * Generated
                                         */
-                                       PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                       PersistentRecords(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                        
                                        
                                        inline int getCellIndex() const 
@@ -17144,6 +19322,64 @@ namespace particles {
  #endif 
  {
                                           _meanCoordinate = (meanCoordinate);
+                                       }
+                                       
+                                       
+                                       
+                                       /**
+                                        * Generated and optimized
+                                        * 
+                                        * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                        * with -DUseManualAlignment you may add 
+                                        * \code
+                                        #pragma vector aligned
+                                        #pragma simd
+                                        \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                        * 
+                                        * The alignment is tied to the unpacked records, i.e. for packed class
+                                        * variants the machine's natural alignment is switched off to recude the  
+                                        * memory footprint. Do not use any SSE/AVX operations or 
+                                        * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                        * If you rely on vectorisation, convert the underlying record 
+                                        * into the unpacked version first. 
+                                        * 
+                                        * @see convert()
+                                        */
+                                       inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                          return _myNorm;
+                                       }
+                                       
+                                       
+                                       
+                                       /**
+                                        * Generated and optimized
+                                        * 
+                                        * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                        * with -DUseManualAlignment you may add 
+                                        * \code
+                                        #pragma vector aligned
+                                        #pragma simd
+                                        \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                        * 
+                                        * The alignment is tied to the unpacked records, i.e. for packed class
+                                        * variants the machine's natural alignment is switched off to recude the  
+                                        * memory footprint. Do not use any SSE/AVX operations or 
+                                        * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                        * If you rely on vectorisation, convert the underlying record 
+                                        * into the unpacked version first. 
+                                        * 
+                                        * @see convert()
+                                        */
+                                       inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                          _myNorm = (myNorm);
                                        }
                                        
                                        
@@ -17404,12 +19640,12 @@ namespace particles {
                                     /**
                                      * Generated
                                      */
-                                    CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                    CellPacked(const int& cellIndex, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                     
                                     /**
                                      * Generated
                                      */
-                                    CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
+                                    CellPacked(const int& cellIndex, const int& numberOfParticlesInChildren, const tarch::la::Vector<DIMENSIONS,double>& meanVelocity, const tarch::la::Vector<DIMENSIONS,double>& meanCoordinate, const tarch::la::Vector<DIMENSIONS,double>& myNorm, const bool& isInside, const State& state, const int& level, const std::bitset<DIMENSIONS>& evenFlags, const tarch::la::Vector<DIMENSIONS_TIMES_TWO,short int>& accessNumber, const int& numberOfLoadsFromInputStream, const int& numberOfStoresToOutputStream);
                                     
                                     /**
                                      * Generated
@@ -17620,6 +19856,90 @@ namespace particles {
                                        assertion(elementIndex>=0);
                                        assertion(elementIndex<DIMENSIONS);
                                        _persistentRecords._meanCoordinate[elementIndex]= meanCoordinate;
+                                       
+                                    }
+                                    
+                                    
+                                    
+                                    /**
+                                     * Generated and optimized
+                                     * 
+                                     * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                     * with -DUseManualAlignment you may add 
+                                     * \code
+                                     #pragma vector aligned
+                                     #pragma simd
+                                     \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                     * 
+                                     * The alignment is tied to the unpacked records, i.e. for packed class
+                                     * variants the machine's natural alignment is switched off to recude the  
+                                     * memory footprint. Do not use any SSE/AVX operations or 
+                                     * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                     * If you rely on vectorisation, convert the underlying record 
+                                     * into the unpacked version first. 
+                                     * 
+                                     * @see convert()
+                                     */
+                                    inline tarch::la::Vector<DIMENSIONS,double> getMyNorm() const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       return _persistentRecords._myNorm;
+                                    }
+                                    
+                                    
+                                    
+                                    /**
+                                     * Generated and optimized
+                                     * 
+                                     * If you realise a for loop using exclusively arrays (vectors) and compile 
+                                     * with -DUseManualAlignment you may add 
+                                     * \code
+                                     #pragma vector aligned
+                                     #pragma simd
+                                     \endcode to this for loop to enforce your compiler to use SSE/AVX.
+                                     * 
+                                     * The alignment is tied to the unpacked records, i.e. for packed class
+                                     * variants the machine's natural alignment is switched off to recude the  
+                                     * memory footprint. Do not use any SSE/AVX operations or 
+                                     * vectorisation on the result for the packed variants, as the data is misaligned. 
+                                     * If you rely on vectorisation, convert the underlying record 
+                                     * into the unpacked version first. 
+                                     * 
+                                     * @see convert()
+                                     */
+                                    inline void setMyNorm(const tarch::la::Vector<DIMENSIONS,double>& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       _persistentRecords._myNorm = (myNorm);
+                                    }
+                                    
+                                    
+                                    
+                                    inline double getMyNorm(int elementIndex) const 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       assertion(elementIndex>=0);
+                                       assertion(elementIndex<DIMENSIONS);
+                                       return _persistentRecords._myNorm[elementIndex];
+                                       
+                                    }
+                                    
+                                    
+                                    
+                                    inline void setMyNorm(int elementIndex, const double& myNorm) 
+ #ifdef UseManualInlining
+ __attribute__((always_inline))
+ #endif 
+ {
+                                       assertion(elementIndex>=0);
+                                       assertion(elementIndex<DIMENSIONS);
+                                       _persistentRecords._myNorm[elementIndex]= myNorm;
                                        
                                     }
                                     

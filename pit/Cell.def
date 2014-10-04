@@ -7,4 +7,5 @@ class particles::pit::dastgen::Cell {
   discard    parallelise int  numberOfParticlesInChildren;
   persistent    double  meanVelocity[DIMENSIONS];
   persistent    double  meanCoordinate[DIMENSIONS];
+  persistent    double  myNorm[DIMENSIONS];
 };
