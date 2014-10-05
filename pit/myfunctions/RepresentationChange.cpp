@@ -152,6 +152,12 @@ void particles::pit::myfunctions::RepresentationChange::leaveCell(
 
     // Write in Heap of compressed Particles
     writeInCompressedHeap(currentParticles, cellIndex, meanVelocity, meanCoordinate);
+    // Compute maxEror norm and save in cell.
+    // We do it here because I don't know how to change cells in ascend in dfor(3) loop
+    if(fineGridCell.isLeaf() && NumberOfParticles > 1) {
+      double maxError = computeMaxError( fineGridCell );
+      fineGridCell.setMyNorm(maxError);
+    }
   }
 }
 
